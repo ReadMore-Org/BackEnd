@@ -15,10 +15,10 @@ license = {text = "MIT"}
 distribution = false
 
 [tool.pdm.scripts]
-pre_dev = "python ./scripts/set_my_ip.py"
+predev = "python ./scripts/set_my_ip.py"
 dev = "python manage.py runserver"
 createsuperuser = "python manage.py createsuperuser"
-makemigrations = "python manage.py makemigrations"
+pre_migrate = "python manage.py makemigrations"
 migrate = "python manage.py migrate"
 post_migrate = "python manage.py graph_models -S -g -o core.png core"
 shell = "python manage.py shell"
