@@ -56,5 +56,6 @@ admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Autor)
 admin.site.register(models.Categoria)
 admin.site.register(models.Editora)
+admin.site.register(models.Livro)
 
 
