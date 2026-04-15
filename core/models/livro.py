@@ -1,6 +1,7 @@
 from django.db import models
 
 from django.core.validators import RegexValidator
+from uploader.models import Image
 
 from .autor import Autor
 from .categoria import Categoria
@@ -46,9 +47,19 @@ class Livro(models.Model):
     capa = models.CharField(max_length=45, choices=CAPA_CHOICES, blank=True, null=True)
     faixa_etaria = models.CharField(max_length=45, choices=CLAS_CHOICES, blank=True, null=True)
     
-    banner = models.ImageField(upload_to='capas/', blank=True, null=True)   
-    
+    banner = models.ImageField(upload_to='capas/', blank=True, null=True)  
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name='livro', null=True, blank=True)
     editora = models.ForeignKey(Editora, on_delete=models.PROTECT, related_name='livro', null=True, blank=True)
     autores = models.ManyToManyField(Autor, related_name='livro', blank=True)
+    
+    capa = models.ForeignKey(
+        Image,
+        related_name='+',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+    )
+    
+    
     
