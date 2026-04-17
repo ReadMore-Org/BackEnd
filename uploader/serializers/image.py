@@ -19,10 +19,18 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()  
+
     class Meta:
         model = Image
         fields = ["url", "description", "uploaded_on"]
         read_only_fields = ["url", "attachment_key", "uploaded_on"]
+
+    def get_url(self, obj):
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.file.url)
+        return obj.file.url
 
     def create(self, validated_data):
         raise NotImplementedError("Use ImageUploadSerializer to create images.")

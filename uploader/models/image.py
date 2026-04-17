@@ -29,7 +29,7 @@ class Image(models.Model):
     )
     file = models.ImageField(upload_to=image_file_path)
     description = models.CharField(max_length=255, blank=True)
-    uploaded_on = models.DateTimeField(auto_now_add=True)
+    uploaded_on = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.description} - {self.attachment_key}"
