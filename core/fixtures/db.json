@@ -2,49 +2,122 @@
   {
     "model": "core.categoria",
     "pk": 1,
-    "fields": {
-      "descricao": "Ficção"
-    }
+    "fields": { "descricao": "Ficção" }
   },
+  {
+    "model": "core.categoria",
+    "pk": 2,
+    "fields": { "descricao": "Fantasia" }
+  },
+  {
+    "model": "core.categoria",
+    "pk": 3,
+    "fields": { "descricao": "Romance" }
+  },
+
   {
     "model": "core.editora",
     "pk": 1,
-    "fields": {
-      "nome": "Editora Teste"
-    }
+    "fields": { "nome": "Editora Teste" }
   },
+  {
+    "model": "core.editora",
+    "pk": 2,
+    "fields": { "nome": "Companhia das Letras" }
+  },
+
   {
     "model": "core.autor",
     "pk": 1,
-    "fields": {
-      "nome": "Erickraft"
-    }
+    "fields": { "nome": "Erickraft" }
   },
+  {
+    "model": "core.autor",
+    "pk": 2,
+    "fields": { "nome": "J.K. Rowling" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 3,
+    "fields": { "nome": "George Orwell" }
+  },
+
   {
     "model": "uploader.image",
     "pk": 1,
-    "fields": {
-      "file": "capas/livro_teste.jpg"
-    }
+    "fields": { "file": "capas/livro1.jpg" }
   },
+  {
+    "model": "uploader.image",
+    "pk": 2,
+    "fields": { "file": "capas/livro2.jpg" }
+  },
+  {
+    "model": "uploader.image",
+    "pk": 3,
+    "fields": { "file": "capas/livro3.jpg" }
+  },
+
   {
     "model": "core.livro",
     "pk": 1,
     "fields": {
-      "titulo": "Tutorial de pvp",
-      "subtitulo": "Subtítulo de Teste",
+      "titulo": "Tutorial de PvP",
+      "subtitulo": "Guia definitivo",
       "isbn": "1234567890123",
-      "sinopse": "Este é um livro de teste para integração frontend-backend.",
+      "sinopse": "Um guia completo para dominar PvP.",
       "idioma": "pt",
-      "paginas": 999,
+      "paginas": 300,
       "avaliacoes": 10,
       "nota": "4.5",
-      "publicacao": "0067-09-05",
+      "publicacao": "2020-09-05",
       "capa": 1,
       "faixa_etaria": "livre",
       "categoria": 1,
       "editora": 1,
       "autores": [1]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 2,
+    "fields": {
+      "titulo": "Harry Potter e a Pedra Filosofal",
+      "subtitulo": "",
+      "isbn": "9788532530783",
+      "sinopse": "Um jovem descobre que é um bruxo e vai para Hogwarts.",
+      "idioma": "pt",
+      "paginas": 264,
+      "avaliacoes": 500,
+      "nota": "4.8",
+      "publicacao": "1997-06-26",
+      "capa": 2,
+      "faixa_etaria": "livre",
+      "categoria": 2,
+      "editora": 2,
+      "autores": [2]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 3,
+    "fields": {
+      "titulo": "1984",
+      "subtitulo": "",
+      "isbn": "9780451524935",
+      "sinopse": "Uma distopia sobre vigilância e controle do estado.",
+      "idioma": "pt",
+      "paginas": 328,
+      "avaliacoes": 800,
+      "nota": "4.7",
+      "publicacao": "1949-06-08",
+      "capa": 3,
+      "faixa_etaria": "14",
+      "categoria": 1,
+      "editora": 2,
+      "autores": [3]
     }
   }
 ]

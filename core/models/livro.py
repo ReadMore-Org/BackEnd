@@ -27,7 +27,7 @@ class Livro(models.Model):
     ]
     
     titulo = models.CharField(max_length=50)
-    subtitulo = models.CharField(max_length=50)
+    subtitulo = models.CharField(max_length=50, blank=True, null=True)
     isbn = models.CharField(max_length=13, validators=[isbn_validador], blank=True, null=True)
     sinopse = models.CharField(max_length=650, blank=True, null=True)
     idioma = models.CharField(max_length=2, blank=True, null=True)
@@ -42,9 +42,9 @@ class Livro(models.Model):
     tipo_capa = models.CharField(max_length=45, choices=CAPA_CHOICES, blank=True, null=True)
     faixa_etaria = models.CharField(max_length=45, choices=CLAS_CHOICES, blank=True, null=True)
     
-    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name='livro', null=True, blank=True)
     editora = models.ForeignKey(Editora, on_delete=models.PROTECT, related_name='livro', null=True, blank=True)
     autores = models.ManyToManyField(Autor, related_name='livro', blank=True)
+    categoria = models.ManyToManyField(Categoria, related_name='livro', blank=True)
     
     capa = models.ForeignKey(
         Image,
