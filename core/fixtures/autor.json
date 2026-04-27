@@ -1,0 +1,17 @@
+[
+  {
+    "model": "core.autor",
+    "pk": 1,
+    "fields": { "nome": "Erickraft" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 2,
+    "fields": { "nome": "J.K. Rowling" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 3,
+    "fields": { "nome": "George Orwell" }
+  }
+]

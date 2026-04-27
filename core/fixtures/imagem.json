@@ -1,0 +1,47 @@
+[
+  {
+    "model": "uploader.image",
+    "pk": 1,
+    "fields": { "file": "capas/livro1.jpg" }
+  },
+  {
+    "model": "uploader.image",
+    "pk": 2,
+    "fields": { "file": "capas/livro2.jpg" }
+  },
+  {
+    "model": "uploader.image",
+    "pk": 3,
+    "fields": { "file": "capas/livro3.jpg" }
+  },
+  {
+    "model": "uploader.image",
+    "pk": 4,
+    "fields": { "file": "capas/livro4.jpg" }
+  },
+    {
+    "model": "uploader.image",
+    "pk": 5,
+    "fields": { "file": "capas/livro4.jpg" }
+  },
+    {
+    "model": "uploader.image",
+    "pk": 6,
+    "fields": { "file": "capas/livro4.jpg" }
+  },
+    {
+    "model": "uploader.image",
+    "pk": 7,
+    "fields": { "file": "capas/livro4.jpg" }
+  },
+    {
+    "model": "uploader.image",
+    "pk": 8,
+    "fields": { "file": "capas/livro4.jpg" }
+  },
+    {
+    "model": "uploader.image",
+    "pk": 9,
+    "fields": { "file": "capas/livro4.jpg" }
+  }
+]

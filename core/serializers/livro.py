@@ -15,6 +15,8 @@ class LivroRetrieveSerializer(ModelSerializer):
         fields = '__all__'
         depth = 1
 
+
+
 class LivroSerializer(ModelSerializer):
     autores = AutorSerializer(many=True, read_only=True)
     capa_attachment_key = SlugRelatedField(
