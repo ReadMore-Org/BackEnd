@@ -1,0 +1,169 @@
+[
+  {
+    "model": "core.livro",
+    "pk": 2,
+    "fields": {
+      "titulo": "Harry Potter e a Pedra Filosofal",
+      "subtitulo": "",
+      "isbn": "9788532530783",
+      "sinopse": "Um jovem descobre que é um bruxo e vai para Hogwarts.",
+      "idioma": "pt",
+      "paginas": 264,
+      "avaliacoes": 500,
+      "nota": "4.8",
+      "publicacao": "1997-06-26",
+      "capa": 2,
+      "faixa_etaria": "livre",
+      "categoria": [2],
+      "editora": 2,
+      "autores": [2]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 3,
+    "fields": {
+      "titulo": "1984",
+      "subtitulo": "",
+      "isbn": "9780451524935",
+      "sinopse": "Uma distopia sobre vigilância e controle do estado.",
+      "idioma": "pt",
+      "paginas": 328,
+      "avaliacoes": 800,
+      "nota": "4.7",
+      "publicacao": "1949-06-08",
+      "capa": 3,
+      "faixa_etaria": "14",
+      "categoria": [1],
+      "editora": 2,
+      "autores": [3]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 4,
+    "fields": {
+      "titulo": "Harry Potter e a Câmara Secreta",
+      "subtitulo": "",
+      "isbn": "9788532530790",
+      "sinopse": "Em seu segundo ano em Hogwarts, Harry Potter enfrenta novos perigos quando uma antiga câmara é aberta dentro da escola, libertando uma criatura misteriosa que ameaça os alunos. Enquanto eventos estranhos acontecem e colegas são atacados, Harry, Rony e Hermione investigam a origem do segredo escondido há décadas, descobrindo conexões com o passado da escola e enfrentando desafios que testam sua coragem e lealdade.",
+      "idioma": "pt",
+      "paginas": 251,
+      "avaliacoes": 450,
+      "nota": "4.6",
+      "publicacao": "1998-07-02",
+      "capa": 4,
+      "faixa_etaria": "livre",
+      "categoria": [2],
+      "editora": 2,
+      "autores": [2]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 5,
+    "fields": {
+      "titulo": "A Revolução dos Bichos",
+      "subtitulo": "",
+      "isbn": "9780451526342",
+      "sinopse": "Nesta fábula política, animais de uma fazenda se rebelam contra seus donos humanos em busca de liberdade e igualdade. No entanto, com o passar do tempo, os líderes da revolução passam a reproduzir os mesmos abusos de poder que antes condenavam. A obra utiliza uma narrativa simples para explorar temas profundos como corrupção, manipulação ideológica e os perigos do autoritarismo.",
+      "idioma": "pt",
+      "paginas": 152,
+      "avaliacoes": 600,
+      "nota": "4.5",
+      "publicacao": "1945-08-17",
+      "capa": 5,
+      "faixa_etaria": "12",
+      "categoria": [1],
+      "editora": 2,
+      "autores": [3]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 6,
+    "fields": {
+      "titulo": "Harry Potter e o Prisioneiro de Azkaban",
+      "subtitulo": "",
+      "isbn": "9788532530806",
+      "sinopse": "No terceiro ano em Hogwarts, Harry descobre que Sirius Black, um perigoso prisioneiro, fugiu da prisão de Azkaban e pode estar à sua procura. Enquanto criaturas assustadoras patrulham a escola e segredos do passado vêm à tona, Harry começa a entender melhor sua própria história e a de seus pais. A trama combina mistério, amizade e revelações surpreendentes.",
+      "idioma": "pt",
+      "paginas": 317,
+      "avaliacoes": 520,
+      "nota": "4.9",
+      "publicacao": "1999-07-08",
+      "capa": 6,
+      "faixa_etaria": "livre",
+      "categoria": [2],
+      "editora": 2,
+      "autores": [2]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 7,
+    "fields": {
+      "titulo": "1984",
+      "subtitulo": "Uma visão distópica do futuro",
+      "isbn": "9780451524936",
+      "sinopse": "Ambientado em uma sociedade totalitária, o romance acompanha Winston Smith, um homem que começa a questionar o regime opressor que controla todos os aspectos da vida. Sob vigilância constante, onde até pensamentos são monitorados, Winston tenta resistir ao sistema, enfrentando as consequências de desafiar um poder absoluto. A obra é uma reflexão profunda sobre liberdade, verdade e controle social.",
+      "idioma": "pt",
+      "paginas": 328,
+      "avaliacoes": 800,
+      "nota": "4.7",
+      "publicacao": "1949-06-08",
+      "capa": 7,
+      "faixa_etaria": "14",
+      "categoria": [1],
+      "editora": 2,
+      "autores": [3]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 8,
+    "fields": {
+      "titulo": "Manual do Sobrevivente Moderno",
+      "subtitulo": "Estratégias para o mundo atual",
+      "isbn": "9780000000008",
+      "sinopse": "Este guia apresenta estratégias práticas para lidar com desafios do mundo moderno, desde situações de risco até tomadas de decisão sob pressão. Com exemplos acessíveis e linguagem direta, o livro aborda temas como planejamento, resiliência e adaptação, sendo útil tanto para situações extremas quanto para o cotidiano.",
+      "idioma": "pt",
+      "paginas": 220,
+      "avaliacoes": 130,
+      "nota": "4.2",
+      "publicacao": "2019-04-10",
+      "capa": 8,
+      "faixa_etaria": "12",
+      "categoria": [1],
+      "editora": 1,
+      "autores": [1]
+    }
+  },
+
+  {
+    "model": "core.livro",
+    "pk": 9,
+    "fields": {
+      "titulo": "Sociedade do Controle",
+      "subtitulo": "Vigilância e poder no século XXI",
+      "isbn": "9780000000009",
+      "sinopse": "A obra explora um cenário fictício em que a tecnologia permite monitorar cada aspecto da vida humana. Através de personagens que vivem sob constante vigilância, o livro discute os limites entre segurança e liberdade, questionando até que ponto o controle pode ser justificado. Uma narrativa provocativa que dialoga com questões atuais da sociedade digital.",
+      "idioma": "pt",
+      "paginas": 290,
+      "avaliacoes": 310,
+      "nota": "4.4",
+      "publicacao": "2005-05-10",
+      "capa": 9,
+      "faixa_etaria": "14",
+      "categoria": [1],
+      "editora": 1,
+      "autores": [1]
+    }
+  }
+]
