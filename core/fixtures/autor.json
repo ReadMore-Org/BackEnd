@@ -1,17 +1,37 @@
 [
   {
     "model": "core.autor",
-    "pk": 1,
-    "fields": { "nome": "Erickraft" }
+    "pk": 4,
+    "fields": { "nome": "Machado de Assis" }
   },
   {
     "model": "core.autor",
-    "pk": 2,
-    "fields": { "nome": "J.K. Rowling" }
+    "pk": 5,
+    "fields": { "nome": "Clarice Lispector" }
   },
   {
     "model": "core.autor",
-    "pk": 3,
-    "fields": { "nome": "George Orwell" }
+    "pk": 6,
+    "fields": { "nome": "J.R.R. Tolkien" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 7,
+    "fields": { "nome": "Stephen King" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 8,
+    "fields": { "nome": "Agatha Christie" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 9,
+    "fields": { "nome": "Dan Brown" }
+  },
+  {
+    "model": "core.autor",
+    "pk": 10,
+    "fields": { "nome": "George R.R. Martin" }
   }
 ]
