@@ -1,4 +1,8 @@
-from .user import UserRegistrationSerializer, UserSerializer
+from .user import (
+    UserSerializer,
+    UserRegistrationSerializer,
+    MeSerializer
+)
 
 from .categoria import CategoriaSerializer
 from .editora import EditoraSerializer
