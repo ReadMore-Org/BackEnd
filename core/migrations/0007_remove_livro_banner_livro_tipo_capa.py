@@ -4,19 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0006_alter_livro_capa'),
+        ("core", "0006_alter_livro_capa"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='livro',
-            name='banner',
+            model_name="livro",
+            name="banner",
         ),
         migrations.AddField(
-            model_name='livro',
-            name='tipo_capa',
-            field=models.CharField(blank=True, choices=[('dura', 'Capa dura'), ('mole', 'Capa mole'), ('sobre', 'Capa dura com sobrecapa'), ('orelhas', 'Capa mole com orelhas')], max_length=45, null=True),
+            model_name="livro",
+            name="tipo_capa",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("dura", "Capa dura"),
+                    ("mole", "Capa mole"),
+                    ("sobre", "Capa dura com sobrecapa"),
+                    ("orelhas", "Capa mole com orelhas"),
+                ],
+                max_length=45,
+                null=True,
+            ),
         ),
     ]

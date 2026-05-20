@@ -25,4 +25,6 @@ class DocumentSerializer(serializers.ModelSerializer):
         read_only_fields = ["url", "attachment_key", "uploaded_on"]
 
     def create(self, validated_data):
-        raise NotImplementedError("Use DocumentUploadSerializer to create document files.")
+        raise NotImplementedError(
+            "Use DocumentUploadSerializer to create document files."
+        )

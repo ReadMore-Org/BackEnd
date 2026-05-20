@@ -19,7 +19,7 @@ class ImageUploadSerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()  
+    url = serializers.SerializerMethodField()
 
     class Meta:
         model = Image
@@ -27,7 +27,7 @@ class ImageSerializer(serializers.ModelSerializer):
         read_only_fields = ["url", "attachment_key", "uploaded_on"]
 
     def get_url(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request:
             return request.build_absolute_uri(obj.file.url)
         return obj.file.url
