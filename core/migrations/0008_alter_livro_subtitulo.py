@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0007_remove_livro_banner_livro_tipo_capa'),
+        ("core", "0007_remove_livro_banner_livro_tipo_capa"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='livro',
-            name='subtitulo',
+            model_name="livro",
+            name="subtitulo",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
     ]

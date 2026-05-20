@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
+from uploader.serializers import ImageSerializer
 
 from core.models.user import User
 
@@ -13,12 +14,13 @@ class UserSerializer(ModelSerializer):
             'id',
             'email',
             'name',
+            'foto',
             'is_active',
             'is_staff',
             'is_superuser',
             'last_login',
             'groups',
-            'show_onboarding'
+            'show_onboarding',
         ]
 
         depth = 1
@@ -50,6 +52,8 @@ class UserRegistrationSerializer(ModelSerializer):
 
 class MeSerializer(ModelSerializer):
 
+    foto = ImageSerializer(read_only=True)
+
     class Meta:
         model = User
 
@@ -57,6 +61,7 @@ class MeSerializer(ModelSerializer):
             'id',
             'email',
             'name',
+            'foto',
             'show_onboarding'
         ]
 

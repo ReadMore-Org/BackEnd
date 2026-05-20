@@ -4,19 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0008_alter_livro_subtitulo'),
+        ("core", "0008_alter_livro_subtitulo"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='livro',
-            name='categoria',
+            model_name="livro",
+            name="categoria",
         ),
         migrations.AddField(
-            model_name='livro',
-            name='categoria',
-            field=models.ManyToManyField(blank=True, related_name='livro', to='core.categoria'),
+            model_name="livro",
+            name="categoria",
+            field=models.ManyToManyField(
+                blank=True, related_name="livro", to="core.categoria"
+            ),
         ),
     ]

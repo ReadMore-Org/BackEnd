@@ -9,16 +9,11 @@ from rest_framework.viewsets import ModelViewSet
 
 from core.models import User
 
-from core.serializers import (
-    UserRegistrationSerializer,
-    UserSerializer,
-    MeSerializer
-)
+from core.serializers import UserRegistrationSerializer, UserSerializer, MeSerializer
 
 
 class UserViewSet(ModelViewSet):
-
-    queryset = User.objects.all().order_by('id')
+    queryset = User.objects.all().order_by("id")
 
     serializer_class = UserSerializer
 
@@ -30,43 +25,29 @@ class UserViewSet(ModelViewSet):
         responses={200: MeSerializer, 401: None},
     )
     @action(
-        detail=False,
-        methods=['get', 'patch'],
-        permission_classes=[IsAuthenticated]
+        detail=False, methods=["get", "patch"], permission_classes=[IsAuthenticated]
     )
     def me(self, request):
 
         user = request.user
 
         # GET
-        if request.method == 'GET':
-
+        if request.method == "GET":
             serializer = MeSerializer(user)
 
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK
-            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         # PATCH
-        serializer = MeSerializer(
-            user,
-            data=request.data,
-            partial=True
-        )
+        serializer = MeSerializer(user, data=request.data, partial=True)
 
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserRegistrationView(CreateAPIView):
-
     queryset = User.objects.all()
 
     serializer_class = UserRegistrationSerializer

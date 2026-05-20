@@ -1,7 +1,9 @@
-from .user import UserRegistrationView, UserViewSet
+from .user import (
+    UserRegistrationView as UserRegistrationView,
+    UserViewSet as UserViewSet,
+)
 
-from .categoria import CategoriaViewSet
-from .editora import EditoraViewSet
-from .autor import AutorViewSet
-from .livro import LivroViewSet
-
+from .categoria import CategoriaViewSet as CategoriaViewSet
+from .editora import EditoraViewSet as EditoraViewSet
+from .autor import AutorViewSet as AutorViewSet
+from .livro import LivroViewSet as LivroViewSet

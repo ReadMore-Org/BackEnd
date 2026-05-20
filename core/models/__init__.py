@@ -1,6 +1,5 @@
-from .user import User
-
-from .categoria import Categoria
-from .editora import Editora
-from .autor import Autor
-from .livro import Livro
+from .user import User as User
+from .categoria import Categoria as Categoria
+from .editora import Editora as Editora
+from .autor import Autor as Autor
+from .livro import Livro as Livro

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0009_remove_livro_categoria_livro_categoria'),
+        ("core", "0009_remove_livro_categoria_livro_categoria"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='show_onboarding',
+            model_name="user",
+            name="show_onboarding",
             field=models.BooleanField(default=True),
         ),
     ]
