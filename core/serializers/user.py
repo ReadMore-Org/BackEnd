@@ -20,6 +20,7 @@ class UserSerializer(ModelSerializer):
             'is_superuser',
             'last_login',
             'groups',
+            'google_picture',
             'show_onboarding',
         ]
 
@@ -62,7 +63,8 @@ class MeSerializer(ModelSerializer):
             'email',
             'name',
             'foto',
-            'show_onboarding'
+            'google_picture',
+            'show_onboarding',
         ]
 
         read_only_fields = [

@@ -2,9 +2,6 @@ from drf_spectacular.utils import extend_schema
 
 import requests
 
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token
-
 from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -18,7 +15,11 @@ from rest_framework.viewsets import ModelViewSet
 
 from core.models import User
 
-from core.serializers import UserRegistrationSerializer, UserSerializer, MeSerializer
+from core.serializers import (
+    UserRegistrationSerializer,
+    UserSerializer,
+    MeSerializer
+)
 
 
 class UserViewSet(ModelViewSet):
@@ -34,7 +35,9 @@ class UserViewSet(ModelViewSet):
         responses={200: MeSerializer, 401: None},
     )
     @action(
-        detail=False, methods=["get", "patch"], permission_classes=[IsAuthenticated]
+        detail=False,
+        methods=["get", "patch"],
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request):
 
@@ -42,21 +45,33 @@ class UserViewSet(ModelViewSet):
 
         # GET
         if request.method == "GET":
+
             serializer = MeSerializer(user)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
 
         # PATCH
-        serializer = MeSerializer(user, data=request.data, partial=True)
+        serializer = MeSerializer(
+            user,
+            data=request.data,
+            partial=True
+        )
 
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
 
 
 class UserRegistrationView(CreateAPIView):
+
     queryset = User.objects.all()
 
     serializer_class = UserRegistrationSerializer
@@ -73,6 +88,7 @@ class GoogleLoginView(APIView):
         access_token = request.data.get("access_token")
 
         if not access_token:
+
             return Response(
                 {"detail": "Token Google não enviado."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -87,6 +103,7 @@ class GoogleLoginView(APIView):
         )
 
         if google_response.status_code != 200:
+
             return Response(
                 {"detail": "Token Google inválido."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -99,6 +116,7 @@ class GoogleLoginView(APIView):
         picture = google_data.get("picture")
 
         if not email:
+
             return Response(
                 {"detail": "Google não retornou email."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -112,10 +130,23 @@ class GoogleLoginView(APIView):
 
             user = User.objects.create(
                 email=email,
-                name=name
+                name=name,
+                google_picture=picture
             )
 
+            # usuário Google não possui senha
             user.set_unusable_password()
+
+            user.save()
+
+        else:
+
+            # atualiza foto Google
+            user.google_picture = picture
+
+            # atualiza nome se estiver vazio
+            if not user.name:
+                user.name = name
 
             user.save()
 
@@ -125,13 +156,14 @@ class GoogleLoginView(APIView):
         return Response({
 
             "access": str(refresh.access_token),
+
             "refresh": str(refresh),
 
             "user": {
                 "id": user.id,
                 "email": user.email,
                 "name": user.name,
-                "picture": picture,
+                "google_picture": user.google_picture,
             }
 
         })
