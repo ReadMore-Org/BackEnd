@@ -1,6 +1,7 @@
 from .user import (
     UserRegistrationView as UserRegistrationView,
     UserViewSet as UserViewSet,
+    GoogleLoginView as GoogleLoginView
 )
 
 from .categoria import CategoriaViewSet as CategoriaViewSet

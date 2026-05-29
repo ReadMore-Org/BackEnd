@@ -1,5 +1,14 @@
 from drf_spectacular.utils import extend_schema
 
+import requests
+
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+
+from rest_framework.views import APIView
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
@@ -53,3 +62,76 @@ class UserRegistrationView(CreateAPIView):
     serializer_class = UserRegistrationSerializer
 
     permission_classes = [AllowAny]
+
+
+class GoogleLoginView(APIView):
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        access_token = request.data.get("access_token")
+
+        if not access_token:
+            return Response(
+                {"detail": "Token Google não enviado."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # pega dados do usuário Google
+        google_response = requests.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={
+                "Authorization": f"Bearer {access_token}"
+            }
+        )
+
+        if google_response.status_code != 200:
+            return Response(
+                {"detail": "Token Google inválido."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        google_data = google_response.json()
+
+        email = google_data.get("email")
+        name = google_data.get("name")
+        picture = google_data.get("picture")
+
+        if not email:
+            return Response(
+                {"detail": "Google não retornou email."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # procura usuário existente
+        user = User.objects.filter(email=email).first()
+
+        # cria automaticamente se não existir
+        if not user:
+
+            user = User.objects.create(
+                email=email,
+                name=name
+            )
+
+            user.set_unusable_password()
+
+            user.save()
+
+        # gera JWT do sistema
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "picture": picture,
+            }
+
+        })
