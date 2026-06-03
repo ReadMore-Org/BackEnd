@@ -20,6 +20,7 @@ from uploader.router import router as uploader_router
 from core.views import (
     UserRegistrationView,
     UserViewSet,
+    GoogleLoginView,
     EditoraViewSet,
     CategoriaViewSet,
     AutorViewSet,
@@ -55,6 +56,7 @@ urlpatterns = [
     path("api/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     # Registro de usuários
     path("api/registro/", UserRegistrationView.as_view(), name="user_registration"),
+    path("api/google-login/", GoogleLoginView.as_view(), name="google_login"),
     # API
     path("api/", include(router.urls)),
     path("api/uploads/", include(uploader_router.urls)),

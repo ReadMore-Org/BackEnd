@@ -45,6 +45,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_("Username"),
     )
     show_onboarding = models.BooleanField(default=True)
+
+    google_picture = models.URLField(
+    blank=True,
+    null=True
+    )
+    
     foto = models.ForeignKey(
         Image,
         related_name="user_foto",
