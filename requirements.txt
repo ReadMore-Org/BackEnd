@@ -35,6 +35,7 @@ pyparsing==3.3.2
 python-dotenv==1.2.2
 python-magic==0.4.27
 pyyaml==6.0.3
+psycopg2-binary==2.9.10
 referencing==0.37.0
 requests==2.33.1
 rpds-py==0.30.0
