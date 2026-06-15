@@ -3,13 +3,14 @@ from rest_framework.serializers import (
     SlugRelatedField,
     ListField,
     CharField,
+    PrimaryKeyRelatedField,
 )
 
 from uploader.models import Image
 from uploader.serializers import ImageSerializer
 
 from core.serializers.autor import AutorSerializer
-from core.models import Livro, Autor
+from core.models import Livro, Autor, Categoria
 
 
 class LivroRetrieveSerializer(ModelSerializer):
@@ -28,6 +29,11 @@ class LivroSerializer(ModelSerializer):
         write_only=True,
         required=False,
     )
+    categoria = PrimaryKeyRelatedField(
+        many=True,
+        queryset=Categoria.objects.all(),
+        required=False,
+    )
     capa_attachment_key = SlugRelatedField(
         source="capa",
         queryset=Image.objects.all(),
@@ -43,15 +49,28 @@ class LivroSerializer(ModelSerializer):
 
     def create(self, validated_data):
         autores_nomes = validated_data.pop("autores_nomes", [])
+        categoria = validated_data.pop("categoria", [])
+
         livro = Livro.objects.create(**validated_data)
+
+        if categoria:
+            livro.categoria.set(categoria)
+
         self._set_autores(livro, autores_nomes)
         return livro
 
     def update(self, instance, validated_data):
         autores_nomes = validated_data.pop("autores_nomes", None)
+        categoria = validated_data.pop("categoria", None)
+
         livro = super().update(instance, validated_data)
+
+        if categoria is not None:
+            livro.categoria.set(categoria)
+
         if autores_nomes is not None:
             self._set_autores(livro, autores_nomes)
+
         return livro
 
     def _set_autores(self, livro, autores_nomes):
