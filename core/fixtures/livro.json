@@ -1,0 +1,42 @@
+[
+  {
+    "model": "core.livro",
+    "pk": 17,
+    "fields": {
+      "titulo": "Memórias Póstumas de Brás Cubas",
+      "subtitulo": "",
+      "isbn": "9788525406980",
+      "sinopse": "Narrado por um defunto autor, Brás Cubas decide contar sua vida após a morte, revisitando episódios marcantes com ironia e crítica social. A obra rompe com convenções tradicionais ao dialogar diretamente com o leitor e apresentar reflexões sobre a sociedade brasileira do século XIX. Com humor ácido e estilo inovador, o romance é um marco do realismo no Brasil.",
+      "idioma": "pt",
+      "paginas": 208,
+      "avaliacoes": 650,
+      "nota": "4.7",
+      "publicacao": "1881-01-01",
+      "capa": 17,
+      "faixa_etaria": "14",
+      "categoria": [1],
+      "editora": 1,
+      "autores": [4]
+    }
+  },
+  {
+    "model": "core.livro",
+    "pk": 18,
+    "fields": {
+      "titulo": "It: A Coisa",
+      "subtitulo": "",
+      "isbn": "9780450411434",
+      "sinopse": "Em uma pequena cidade, um grupo de crianças enfrenta uma entidade maligna que assume a forma de seus maiores medos, frequentemente aparecendo como um palhaço assustador. Anos depois, já adultos, eles precisam retornar para confrontar novamente o terror que acreditavam ter derrotado. A narrativa alterna entre passado e presente, explorando amizade, trauma e coragem.",
+      "idioma": "pt",
+      "paginas": 1138,
+      "avaliacoes": 1400,
+      "nota": "4.8",
+      "publicacao": "1986-09-15",
+      "capa": 18,
+      "faixa_etaria": "16",
+      "categoria": [1],
+      "editora": 2,
+      "autores": [7]
+    }
+  }
+]

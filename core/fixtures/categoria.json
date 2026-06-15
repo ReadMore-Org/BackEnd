@@ -1,0 +1,17 @@
+[
+  {
+    "model": "core.categoria",
+    "pk": 1,
+    "fields": { "descricao": "Ficção" }
+  },
+  {
+    "model": "core.categoria",
+    "pk": 2,
+    "fields": { "descricao": "Fantasia" }
+  },
+  {
+    "model": "core.categoria",
+    "pk": 3,
+    "fields": { "descricao": "Romance" }
+  }
+]

@@ -1,2 +1,9 @@
-from .document import DocumentSerializer, DocumentUploadSerializer
-from .image import ImageSerializer, ImageUploadSerializer
+from .document import (
+    DocumentSerializer as DocumentSerializer,
+    DocumentUploadSerializer as DocumentUploadSerializer,
+)
+
+from .image import (
+    ImageSerializer as ImageSerializer,
+    ImageUploadSerializer as ImageUploadSerializer,
+)

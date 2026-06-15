@@ -1,0 +1,12 @@
+[
+  {
+    "model": "core.editora",
+    "pk": 1,
+    "fields": { "nome": "Editora Teste" }
+  },
+  {
+    "model": "core.editora",
+    "pk": 2,
+    "fields": { "nome": "Companhia das Letras" }
+  }
+]
