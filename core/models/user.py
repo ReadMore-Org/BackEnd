@@ -51,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     null=True
     )
     
+
     foto = models.ForeignKey(
         Image,
         related_name="user_foto",

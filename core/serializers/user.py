@@ -1,8 +1,11 @@
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SlugRelatedField
 from uploader.serializers import ImageSerializer
 
 from core.models.user import User
+
+from uploader.models import Image
+from uploader.serializers import ImageSerializer
 
 
 class UserSerializer(ModelSerializer):
@@ -52,6 +55,13 @@ class UserRegistrationSerializer(ModelSerializer):
 
 
 class MeSerializer(ModelSerializer):
+    foto_attachment_key = SlugRelatedField(
+        source='foto',
+        queryset=Image.objects.all(),
+        slug_field='attachment_key',
+        required=False,
+        write_only=True,
+    )
 
     foto = ImageSerializer(read_only=True)
 
@@ -63,6 +73,7 @@ class MeSerializer(ModelSerializer):
             'email',
             'name',
             'foto',
+            'foto_attachment_key',
             'google_picture',
             'show_onboarding',
         ]
