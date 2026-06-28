@@ -1,6 +1,9 @@
 from drf_spectacular.utils import extend_schema
 
 import requests
+from django.core.files.base import ContentFile
+
+from uploader.models import Image
 
 from rest_framework.views import APIView
 
@@ -18,7 +21,7 @@ from core.models import User
 from core.serializers import (
     UserRegistrationSerializer,
     UserSerializer,
-    MeSerializer
+    MeSerializer,
 )
 
 
@@ -37,41 +40,37 @@ class UserViewSet(ModelViewSet):
     @action(
         detail=False,
         methods=["get", "patch"],
-        permission_classes=[IsAuthenticated]
+        permission_classes=[IsAuthenticated],
     )
     def me(self, request):
-
         user = request.user
 
         # GET
         if request.method == "GET":
-
             serializer = MeSerializer(user)
 
             return Response(
                 serializer.data,
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         # PATCH
         serializer = MeSerializer(
             user,
             data=request.data,
-            partial=True
+            partial=True,
         )
 
         serializer.is_valid(raise_exception=True)
-
         serializer.save()
 
         return Response(
             serializer.data,
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
 
 class UserRegistrationView(CreateAPIView):
-
     queryset = User.objects.all()
 
     serializer_class = UserRegistrationSerializer
@@ -79,19 +78,63 @@ class UserRegistrationView(CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class GoogleLoginView(APIView):
+def save_google_picture(user, picture_url):
+    if not picture_url:
+        return
 
+    try:
+        response = requests.get(
+            picture_url,
+            timeout=10,
+        )
+
+        print("Status download Google:", response.status_code)
+
+        if response.status_code != 200:
+            return
+
+        image = Image(
+            description=f"Foto Google de {user.email}"
+        )
+
+        image.file.save(
+            f"user_{user.id}.jpg",
+            ContentFile(response.content),
+            save=True,
+        )
+
+        print("Imagem criada:", image.id)
+        print("Arquivo:", image.file.name)
+
+        old_image = user.foto
+
+        user.foto = image
+
+        print("Foto atribuída ao usuário:", user.foto)
+
+        if old_image:
+            try:
+                if old_image.file:
+                    old_image.file.delete(save=False)
+            except ValueError:
+                pass
+
+            old_image.delete()
+
+    except Exception as e:
+        print("Erro ao salvar foto Google:", e)
+
+
+class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-
         access_token = request.data.get("access_token")
 
         if not access_token:
-
             return Response(
                 {"detail": "Token Google não enviado."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # pega dados do usuário Google
@@ -99,14 +142,13 @@ class GoogleLoginView(APIView):
             "https://www.googleapis.com/oauth2/v3/userinfo",
             headers={
                 "Authorization": f"Bearer {access_token}"
-            }
+            },
         )
 
         if google_response.status_code != 200:
-
             return Response(
                 {"detail": "Token Google inválido."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         google_data = google_response.json()
@@ -116,10 +158,9 @@ class GoogleLoginView(APIView):
         picture = google_data.get("picture")
 
         if not email:
-
             return Response(
                 {"detail": "Google não retornou email."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # procura usuário existente
@@ -127,43 +168,43 @@ class GoogleLoginView(APIView):
 
         # cria automaticamente se não existir
         if not user:
-
             user = User.objects.create(
                 email=email,
                 name=name,
-                google_picture=picture
+                google_picture=picture,
             )
 
-            # usuário Google não possui senha
             user.set_unusable_password()
 
+            save_google_picture(user, picture)
+            print("ANTES DO SAVE:", user.foto)
             user.save()
+            print("DEPOIS DO SAVE:", user.foto)
 
         else:
+            if user.google_picture != picture or not user.foto:
+                save_google_picture(user, picture)
 
-            # atualiza foto Google
             user.google_picture = picture
 
-            # atualiza nome se estiver vazio
             if not user.name:
                 user.name = name
-
+            print("ANTES DO SAVE:", user.foto)
             user.save()
+            print("DEPOIS DO SAVE:", user.foto)
 
         # gera JWT do sistema
         refresh = RefreshToken.for_user(user)
 
-        return Response({
-
-            "access": str(refresh.access_token),
-
-            "refresh": str(refresh),
-
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "name": user.name,
-                "google_picture": user.google_picture,
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": user.name,
+                    "google_picture": user.google_picture,
+                },
             }
-
-        })
+        )

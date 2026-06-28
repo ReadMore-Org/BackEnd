@@ -30,3 +30,7 @@
     check = "ruff check"
     pre_format = "ruff check --fix"
     format = "ruff format"
+[dependency-groups]
+dev = [
+    "ruff>=0.15.20",
+]
