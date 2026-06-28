@@ -1,14 +1,33 @@
 import mimetypes
+import os
 import uuid
 
 from django.db import models
 
 
-def image_file_path(image, _) -> str:
-    extension: str = mimetypes.guess_extension(image.file.file.content_type)
+def image_file_path(image, filename) -> str:
+    extension = None
+
+    # Caso o arquivo venha de um upload do navegador
+    try:
+        content_type = getattr(image.file.file, "content_type", None)
+
+        if content_type:
+            extension = mimetypes.guess_extension(content_type)
+    except Exception:
+        pass
+
+    # Caso seja um ContentFile (Google)
+    if not extension:
+        extension = os.path.splitext(filename)[1]
+
     if extension == ".jpe":
         extension = ".jpg"
-    return f"images/{image.public_id}{extension or ''}"
+
+    if not extension:
+        extension = ".jpg"
+
+    return f"images/{image.public_id}{extension}"
 
 
 class Image(models.Model):

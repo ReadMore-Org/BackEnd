@@ -6,23 +6,23 @@
     "${workspaceFolder}/__pypackages__/3.12/lib"
   ],
   "workbench.colorCustomizations": {
-    "activityBar.activeBackground": "#ffccd4",
-    "activityBar.background": "#ffccd4",
+    "activityBar.activeBackground": "#e4b849",
+    "activityBar.background": "#e4b849",
     "activityBar.foreground": "#15202b",
     "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#199f00",
+    "activityBarBadge.background": "#158b69",
     "activityBarBadge.foreground": "#e7e7e7",
     "commandCenter.border": "#15202b99",
-    "sash.hoverBorder": "#ffccd4",
-    "statusBar.background": "#ff99a9",
+    "sash.hoverBorder": "#e4b849",
+    "statusBar.background": "#daa520",
     "statusBar.foreground": "#15202b",
-    "statusBarItem.hoverBackground": "#ff667e",
-    "statusBarItem.remoteBackground": "#ff99a9",
+    "statusBarItem.hoverBackground": "#ad8319",
+    "statusBarItem.remoteBackground": "#daa520",
     "statusBarItem.remoteForeground": "#15202b",
-    "titleBar.activeBackground": "#ff99a9",
+    "titleBar.activeBackground": "#daa520",
     "titleBar.activeForeground": "#15202b",
-    "titleBar.inactiveBackground": "#ff99a999",
+    "titleBar.inactiveBackground": "#daa52099",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#ff99a9"
+  "peacock.color": "#DAA520"
 }

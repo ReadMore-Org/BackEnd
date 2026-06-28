@@ -27,7 +27,7 @@ class Livro(models.Model):
     isbn = models.CharField(
         max_length=13, validators=[isbn_validador], blank=True, null=True
     )
-    sinopse = models.CharField(max_length=650, blank=True, null=True)   
+    sinopse = models.CharField(max_length=650, blank=True, null=True)
     idioma = models.CharField(max_length=2, blank=True, null=True)
 
     paginas = models.IntegerField(blank=True, null=True)
