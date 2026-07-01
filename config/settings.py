@@ -5,6 +5,10 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
+from decouple import config
+
+GOOGLE_BOOKS_API_KEY = config("GOOGLE_BOOKS_API_KEY")
+
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 

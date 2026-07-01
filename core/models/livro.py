@@ -26,10 +26,10 @@ class Livro(models.Model):
         ('orelhas', 'Capa mole com orelhas')
     ]
     
-    titulo = models.CharField(max_length=50)
-    subtitulo = models.CharField(max_length=50, blank=True, null=True)
-    isbn = models.CharField(max_length=13, validators=[isbn_validador], blank=True, null=True)
-    sinopse = models.CharField(max_length=650, blank=True, null=True)
+    titulo = models.CharField(max_length=260, blank=True)
+    subtitulo = models.CharField(max_length=260, blank=True, null=True)
+    isbn = models.CharField(max_length=13, validators=[isbn_validador], unique=True, blank=True, null=True)
+    sinopse = models.TextField(blank=True, null=True)
     idioma = models.CharField(max_length=2, blank=True, null=True)
     
     paginas = models.IntegerField(blank=True, null=True)

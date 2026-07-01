@@ -18,6 +18,7 @@ from rest_framework_simplejwt.views import (
 from uploader.router import router as uploader_router
 
 from core.views import UserRegistrationView, UserViewSet, EditoraViewSet, CategoriaViewSet, AutorViewSet, LivroViewSet
+from core.views.livro import LivroGoogleAPIView
 
 router = DefaultRouter()
 
@@ -51,6 +52,12 @@ urlpatterns = [
     # API
     path('api/', include(router.urls)),
     path('api/uploads/', include(uploader_router.urls)),
+    
+    
+    path(
+        "api/google-books/<str:isbn>/",
+        LivroGoogleAPIView.as_view()
+    ),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
