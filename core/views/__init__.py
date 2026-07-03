@@ -1,8 +1,18 @@
+
 from .user import (
     UserRegistrationView as UserRegistrationView,
     UserViewSet as UserViewSet,
     GoogleLoginView as GoogleLoginView,
 )
+
+
+
+from .categoria import CategoriaViewSet
+from .editora import EditoraViewSet
+from .autor import AutorViewSet
+from .livro import LivroGoogleAPIView
+from .livro import LivroViewSet
+
 
 from .categoria import CategoriaViewSet as CategoriaViewSet
 from .editora import EditoraViewSet as EditoraViewSet

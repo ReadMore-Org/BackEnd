@@ -17,6 +17,7 @@ from rest_framework_simplejwt.views import (
 
 from uploader.router import router as uploader_router
 
+
 from core.views import (
     UserRegistrationView,
     UserViewSet,
@@ -26,6 +27,9 @@ from core.views import (
     AutorViewSet,
     LivroViewSet,
 )
+
+from core.views.livro import LivroGoogleAPIView
+
 
 router = DefaultRouter()
 
@@ -58,7 +62,15 @@ urlpatterns = [
     path("api/registro/", UserRegistrationView.as_view(), name="user_registration"),
     path("api/google-login/", GoogleLoginView.as_view(), name="google_login"),
     # API
-    path("api/", include(router.urls)),
-    path("api/uploads/", include(uploader_router.urls)),
+
+    path('api/', include(router.urls)),
+    path('api/uploads/', include(uploader_router.urls)),
+    
+    
+    path(
+        "api/google-books/<str:isbn>/",
+        LivroGoogleAPIView.as_view()
+    ),
+
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
