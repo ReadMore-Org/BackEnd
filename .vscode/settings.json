@@ -6,6 +6,7 @@
     "${workspaceFolder}/__pypackages__/3.12/lib"
   ],
   "workbench.colorCustomizations": {
+
     "activityBar.activeBackground": "#e4b849",
     "activityBar.background": "#e4b849",
     "activityBar.foreground": "#15202b",
@@ -25,4 +26,5 @@
     "titleBar.inactiveForeground": "#15202b99"
   },
   "peacock.color": "#DAA520"
+
 }

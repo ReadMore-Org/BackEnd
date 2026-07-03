@@ -11,26 +11,32 @@
     license = {text = "MIT"}
 
 
-    [tool.pdm]
-    distribution = false
-
-    [tool.pdm.scripts]
-    predev = "python ./scripts/set_my_ip.py"
-    dev = "python manage.py runserver"
-    createsuperuser = "python manage.py createsuperuser"
-    pre_migrate = "python manage.py makemigrations"
-    migrate = "python manage.py migrate"
-    post_migrate = "python manage.py graph_models --disable-sort-fields -S -g -o core.png core uploader"
-    shell = "python manage.py shell"
-    shellp = "python manage.py shell_plus"
-    test = "python manage.py test"
-    loaddata = "python manage.py loaddata core.json"
-    dumpdata = "python manage.py dumpdata --indent 2"
-    cria_api = "python ./scripts/cria_api.py {args}"
-    check = "ruff check"
-    pre_format = "ruff check --fix"
-    format = "ruff format"
+  
 [dependency-groups]
 dev = [
     "ruff>=0.15.20",
 ]
+
+dependencies = ["django>=6.0.4", "dj-database-url>=3.1.2", "dotenv>=0.9.9", "django-cloudinary-storage>=0.3.0", "django-cors-headers>=4.9.0", "django-extensions>=4.1", "django-filter>=25.2", "drf-spectacular>=0.29.0", "django-rest-framework>=0.1.0", "djangorestframework-simplejwt>=5.5.1", "whitenoise>=6.12.0", "pillow>=12.2.0", "graphviz>=0.21", "python-magic>=0.4.27", "pydotplus>=2.0.2", "python-decouple>=3.8"]
+
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+predev = "python ./scripts/set_my_ip.py"
+dev = "python manage.py runserver"
+createsuperuser = "python manage.py createsuperuser"
+pre_migrate = "python manage.py makemigrations"
+migrate = "python manage.py migrate"
+post_migrate = "python manage.py graph_models --disable-sort-fields -S -g -o core.png core uploader"
+shell = "python manage.py shell"
+shellp = "python manage.py shell_plus"
+test = "python manage.py test"
+loaddata = "python manage.py loaddata core.json"
+dumpdata = "python manage.py dumpdata --indent 2"
+cria_api = "python ./scripts/cria_api.py {args}"
+check = "ruff check"
+pre_format = "ruff check --fix"
+format = "ruff format"

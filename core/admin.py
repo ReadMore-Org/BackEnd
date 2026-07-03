@@ -2,6 +2,7 @@ from django.contrib.admin import ModelAdmin, register
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
+
 from core.models import Autor, Categoria, Editora, Livro, User
 
 
@@ -67,10 +68,63 @@ class UserAdmin(BaseUserAdmin):
         (_("User Permissions"), {"fields": ("user_permissions",)}),
     )
     readonly_fields = ["last_login"]
+
+from core.models import (
+    Autor,
+    Categoria,
+    Editora,
+    Livro,
+    User
+)
+
+
+
+@admin.register(Livro)
+class LivroAdmin(admin.ModelAdmin):
+
+    list_display = ['titulo', 'isbn', 'editora']
+    search_fields = ['titulo', 'isbn']
+    list_filter = ['editora']
+    ordering = ['titulo']
+    list_per_page = 25
+
+
+@admin.register(Autor)
+class AutorAdmin(admin.ModelAdmin):
+
+    list_display = ['nome']
+    search_fields = ['nome']
+    list_filter = ['nome']
+    ordering = ['nome']
+    list_per_page = 10
+
+
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
+
+    list_display = ['descricao']
+    search_fields = ['descricao']
+    list_filter = ['descricao']
+    ordering = ['descricao']
+    list_per_page = 10
+
+
+@admin.register(Editora)
+class EditoraAdmin(admin.ModelAdmin):
+
+    list_display = ['nome']
+    search_fields = ['nome']
+    list_filter = ['nome']
+    ordering = ['nome']
+    list_per_page = 10
+
+
+
     add_fieldsets = (
         (
             None,
             {
+
                 "classes": ("wide",),
                 "fields": (
                     "email",
@@ -84,3 +138,4 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
+
