@@ -88,7 +88,7 @@ def importar_livro_google(dados, usuario, status="quero_ler"):
             editora=_get_or_create_editora(dados.get("editora")),
         )
         _set_autores(livro, dados.get("autores", []))
-        _set_categorias(livro, dados.get("categoria", []))  # corrigido: chave é "categoria", não "categorias"
+        _set_categorias(livro, dados.get("categorias", []))  # corrigido: chave é "categoria", não "categorias"
         capa_url = dados.get("capa")
         if capa_url:
             imagem = _baixar_capa(capa_url, descricao=livro.titulo)

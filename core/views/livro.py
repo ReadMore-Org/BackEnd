@@ -1,8 +1,9 @@
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from core.models import Livro
+from core.models import Livro, LivroUsuario
 from core.serializers import LivroSerializer, LivroUsuarioSerializer
 
 
@@ -10,6 +11,22 @@ from core.services.google_books_service import (
     buscar_livro_por_isbn
 )
 from core.services.google_books_import_service import importar_livro_google
+
+
+class MeusLivrosAPIView(generics.ListAPIView):
+    serializer_class = LivroUsuarioSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = LivroUsuario.objects.filter(
+            usuario=self.request.user
+        ).select_related("livro")
+
+        status_filtro = self.request.query_params.get("status")
+        if status_filtro:
+            queryset = queryset.filter(status=status_filtro)
+
+        return queryset
 
 
 class LivroGoogleAPIView(APIView):
@@ -31,7 +48,7 @@ class LivroGoogleAPIView(APIView):
             )
 
         return Response(livro)
-    
+
 
 class LivroViewSet(ModelViewSet):
     queryset = Livro.objects.all()

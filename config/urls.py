@@ -28,7 +28,7 @@ from core.views import (
     LivroViewSet,
 )
 
-from core.views.livro import LivroGoogleAPIView, ImportarLivroGoogleAPIView
+from core.views.livro import LivroGoogleAPIView, ImportarLivroGoogleAPIView, MeusLivrosAPIView
 
 
 router = DefaultRouter()
@@ -71,6 +71,7 @@ urlpatterns = [
         "api/livros/importar-google/",
         ImportarLivroGoogleAPIView.as_view()
     ),
+    path("api/livros-usuario/", MeusLivrosAPIView.as_view(), name="meus-livros"),
 
     path('api/', include(router.urls)),
     path('api/uploads/', include(uploader_router.urls)),
