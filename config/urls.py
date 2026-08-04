@@ -72,6 +72,7 @@ urlpatterns = [
         ImportarLivroGoogleAPIView.as_view()
     ),
     path("api/livros-usuario/", MeusLivrosAPIView.as_view(), name="meus-livros"),
+    path("api/livros-usuario/<int:pk>/", MeusLivrosAPIView.as_view(), name="meus-livros-detail"), 
 
     path('api/', include(router.urls)),
     path('api/uploads/', include(uploader_router.urls)),
