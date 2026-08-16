@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from core.models import Livro, LivroUsuario
-from core.serializers import LivroSerializer, LivroUsuarioSerializer
+from core.serializers import LivroSerializer, LivroUsuarioSerializer, LivroUsuarioWriteSerializer
 
 
 from core.services.google_books_service import (
@@ -13,9 +13,14 @@ from core.services.google_books_service import (
 from core.services.google_books_import_service import importar_livro_google
 
 
-class MeusLivrosAPIView(generics.ListAPIView):
-    serializer_class = LivroUsuarioSerializer
+class MeusLivrosAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return LivroUsuarioWriteSerializer
+
+        return LivroUsuarioSerializer
 
     def get_queryset(self):
         queryset = LivroUsuario.objects.filter(
@@ -23,10 +28,28 @@ class MeusLivrosAPIView(generics.ListAPIView):
         ).select_related("livro")
 
         status_filtro = self.request.query_params.get("status")
+
         if status_filtro:
             queryset = queryset.filter(status=status_filtro)
 
         return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
+    
+class MeuLivroDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method in ["PATCH", "PUT"]:
+            return LivroUsuarioWriteSerializer
+
+        return LivroUsuarioSerializer
+
+    def get_queryset(self):
+        return LivroUsuario.objects.filter(
+            usuario=self.request.user
+        ).select_related("livro")
 
 
 class LivroGoogleAPIView(APIView):

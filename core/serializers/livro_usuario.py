@@ -11,3 +11,8 @@ class LivroUsuarioSerializer(ModelSerializer):
         model = LivroUsuario
         fields = "__all__"
         read_only_fields = ("usuario",)
+
+class LivroUsuarioWriteSerializer(ModelSerializer):
+    class Meta:
+        model = LivroUsuario
+        fields = ("livro", "status")

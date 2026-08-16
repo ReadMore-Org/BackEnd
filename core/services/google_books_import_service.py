@@ -27,17 +27,31 @@ def _set_categorias(livro, nomes):
     livro.categoria.set(categorias)
 
 
-def _set_autores(livro, nomes):
-    if not nomes:
+def _set_autores(livro, autores_dados):
+    if not autores_dados:
         return
-    autores = []
-    for nome in nomes:
-        nome = (nome or "").strip()
-        if not nome:
-            continue
-        autor, _ = Autor.objects.get_or_create(nome=nome)
-        autores.append(autor)
-    livro.autores.set(autores)
+
+    autores_objs = []
+    
+    for item in autores_dados:
+        # Se o item for um dicionário, extrai a chave 'nome' ou 'name'
+        if isinstance(item, dict):
+            nome = item.get("nome") or item.get("name") or ""
+        elif isinstance(item, str):
+            nome = item
+        else:
+            nome = str(item) if item else ""
+
+        # Trata a string removendo espaços extras
+        nome = nome.strip()
+
+        if nome:
+            # Substitua 'Autor' pelo nome do seu Model de Autor
+            autor_obj, _ = Autor.objects.get_or_create(nome=nome)
+            autores_objs.append(autor_obj)
+
+    # Associa os autores ao livro (M2M)
+    livro.autores.set(autores_objs)
 
 
 def _baixar_capa(capa_url, descricao=""):

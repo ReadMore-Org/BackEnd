@@ -17,7 +17,7 @@ class LivroUsuario(models.Model):
         related_name="livros_usuario",
     )
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE, related_name="usuarios")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="quero_ler")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank=True, null=True)
     adicionado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 

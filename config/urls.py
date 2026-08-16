@@ -28,8 +28,12 @@ from core.views import (
     LivroViewSet,
 )
 
-from core.views.livro import LivroGoogleAPIView, ImportarLivroGoogleAPIView, MeusLivrosAPIView
-
+from core.views.livro import (
+    LivroGoogleAPIView,
+    ImportarLivroGoogleAPIView,
+    MeusLivrosAPIView,
+    MeuLivroDetailAPIView,
+)
 
 router = DefaultRouter()
 
@@ -62,20 +66,19 @@ urlpatterns = [
     path("api/registro/", UserRegistrationView.as_view(), name="user_registration"),
     path("api/google-login/", GoogleLoginView.as_view(), name="google_login"),
     # API
-
+    path("api/google-books/<str:isbn>/", LivroGoogleAPIView.as_view()),
+    path("api/livros/importar-google/", ImportarLivroGoogleAPIView.as_view()),
     path(
-        "api/google-books/<str:isbn>/",
-        LivroGoogleAPIView.as_view()
+        "api/livros-usuario/",
+        MeusLivrosAPIView.as_view(),
+        name="meus-livros",
     ),
     path(
-        "api/livros/importar-google/",
-        ImportarLivroGoogleAPIView.as_view()
+        "api/livros-usuario/<int:pk>/",
+        MeuLivroDetailAPIView.as_view(),
+        name="meu-livro-detail",
     ),
-    path("api/livros-usuario/", MeusLivrosAPIView.as_view(), name="meus-livros"),
-    path("api/livros-usuario/<int:pk>/", MeusLivrosAPIView.as_view(), name="meus-livros-detail"), 
-
-    path('api/', include(router.urls)),
-    path('api/uploads/', include(uploader_router.urls)),
-
+    path("api/", include(router.urls)),
+    path("api/uploads/", include(uploader_router.urls)),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
