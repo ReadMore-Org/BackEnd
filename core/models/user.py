@@ -54,6 +54,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_("Biografia"),
     )
 
+    meta_leitura = models.PositiveIntegerField(
+        default=10,
+        verbose_name=_("meta de leitura"),
+        help_text=_("Meta anual de livros para leitura"),
+    )
+
     google_picture = models.URLField(blank=True, null=True)
 
     foto = models.ForeignKey(
