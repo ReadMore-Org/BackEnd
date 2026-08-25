@@ -62,7 +62,7 @@ class MeSerializer(ModelSerializer):
             "email",
             "name",
             "bio",
-            "meta_leitura"
+            "meta_leitura",
             "foto",
             "foto_attachment_key",
             "google_picture",
