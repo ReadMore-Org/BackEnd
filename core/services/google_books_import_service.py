@@ -3,7 +3,11 @@ from datetime import date
 from django.core.files.base import ContentFile
 import requests
 
-from core.models import Autor, Categoria, Editora, Livro, LivroUsuario
+from core.models import Autor, Editora, Livro, LivroUsuario
+from core.services.categorias_google import (
+    normalizar_categorias_google,
+    obter_ou_criar_categoria,
+)
 from uploader.models import Image
 
 
@@ -14,17 +18,12 @@ def _get_or_create_editora(nome):
     return editora
 
 
-def _set_categorias(livro, nomes):
+def _set_categorias(livro, categorias_brutas):
+    """Aceita as categorias cruas do Google ("Fiction / Romance / General")."""
+    nomes = normalizar_categorias_google(categorias_brutas)
     if not nomes:
         return
-    categorias = []
-    for nome in nomes:
-        nome = (nome or "").strip()
-        if not nome:
-            continue
-        categoria, _ = Categoria.objects.get_or_create(descricao=nome)
-        categorias.append(categoria)
-    livro.categoria.set(categorias)
+    livro.categoria.set([obter_ou_criar_categoria(nome) for nome in nomes])
 
 
 def _set_autores(livro, autores_dados):
@@ -102,13 +101,17 @@ def importar_livro_google(dados, usuario, status="quero_ler"):
             editora=_get_or_create_editora(dados.get("editora")),
         )
         _set_autores(livro, dados.get("autores", []))
-        _set_categorias(livro, dados.get("categorias", []))  # corrigido: chave é "categoria", não "categorias"
+        _set_categorias(livro, dados.get("categorias", []))
         capa_url = dados.get("capa")
         if capa_url:
             imagem = _baixar_capa(capa_url, descricao=livro.titulo)
             if imagem:
                 livro.capa = imagem
                 livro.save()
+    elif not livro.categoria.exists():
+        # Livro já existia (criado antes, sem categoria): preenche agora
+        _set_categorias(livro, dados.get("categorias", []))
+
     livro_usuario, criado = LivroUsuario.objects.get_or_create(
         usuario=usuario,
         livro=livro,
