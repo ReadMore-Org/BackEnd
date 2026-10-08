@@ -4,3 +4,5 @@ from .editora import Editora as Editora
 from .autor import Autor as Autor
 from .livro import Livro as Livro
 from .livro_usuario import LivroUsuario as LivroUsuario
+from .anuncio import Anuncio as Anuncio
+ 

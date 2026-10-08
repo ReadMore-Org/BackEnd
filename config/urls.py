@@ -34,6 +34,7 @@ from core.views.livro import (
     MeusLivrosAPIView,
     MeuLivroDetailAPIView,
 )
+from core.views.anuncio import AnuncioViewSet
 
 router = DefaultRouter()
 
@@ -42,6 +43,7 @@ router.register(r"editoras", EditoraViewSet, basename="editoras")
 router.register(r"categorias", CategoriaViewSet, basename="categorias")
 router.register(r"autores", AutorViewSet, basename="autores")
 router.register(r"livros", LivroViewSet, basename="livros")
+router.register(r"anuncios", AnuncioViewSet, basename="anuncios")
 
 
 urlpatterns = [

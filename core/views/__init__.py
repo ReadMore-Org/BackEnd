@@ -12,9 +12,11 @@ from .editora import EditoraViewSet
 from .autor import AutorViewSet
 from .livro import LivroGoogleAPIView
 from .livro import LivroViewSet
+from .anuncio import AnuncioViewSet
 
 
 from .categoria import CategoriaViewSet as CategoriaViewSet
 from .editora import EditoraViewSet as EditoraViewSet
 from .autor import AutorViewSet as AutorViewSet
 from .livro import LivroViewSet as LivroViewSet
+from .anuncio import AnuncioViewSet as AnuncioViewSet

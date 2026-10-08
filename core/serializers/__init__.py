@@ -3,10 +3,16 @@ from .user import (
     UserRegistrationSerializer as UserRegistrationSerializer,
     MeSerializer as MeSerializer,
 )
-
+ 
 from .categoria import CategoriaSerializer as CategoriaSerializer
 from .editora import EditoraSerializer as EditoraSerializer
 from .autor import AutorSerializer as AutorSerializer
 from .livro import LivroSerializer as LivroSerializer
 from .livro_usuario import LivroUsuarioSerializer as LivroUsuarioSerializer
 from .livro_usuario import LivroUsuarioWriteSerializer as LivroUsuarioWriteSerializer
+from .anuncio import (
+    AnuncioListSerializer as AnuncioListSerializer,
+    AnuncioDetailSerializer as AnuncioDetailSerializer,
+    AnuncioWriteSerializer as AnuncioWriteSerializer,
+)
+ 
