@@ -16,7 +16,7 @@ class UserSerializer(ModelSerializer):
             "email",
             "name",
             "bio",
-            "meta_leitura"
+            "meta_leitura",
             "foto",
             "is_active",
             "is_staff",
