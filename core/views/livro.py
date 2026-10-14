@@ -13,43 +13,69 @@ from core.services.google_books_service import (
 from core.services.google_books_import_service import importar_livro_google
 
 
-class MeusLivrosAPIView(generics.ListCreateAPIView):
+class MeusLivrosViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
+    queryset = LivroUsuario.objects.all()
+    http_method_names = ['get', 'patch', 'post', 'delete']
+
+    serializer_class = LivroUsuarioSerializer
+
 
     def get_serializer_class(self):
-        if self.request.method == "POST":
+        if self.action in {'post'}:
             return LivroUsuarioWriteSerializer
 
+        if self. action in {"patch"}:
+                    return LivroUsuarioWriteSerializer
+    
         return LivroUsuarioSerializer
 
     def get_queryset(self):
+        usuario = self.request.user
         queryset = LivroUsuario.objects.filter(
-            usuario=self.request.user
+            usuario=usuario
         ).select_related("livro")
-
-        status_filtro = self.request.query_params.get("status")
-
-        if status_filtro:
-            queryset = queryset.filter(status=status_filtro)
+        
 
         return queryset
 
-    def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+# class MeusLivrosAPIView(generics.ListCreateAPIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get_serializer_class(self):
+#         if self.request.method == "POST":
+#             return LivroUsuarioWriteSerializer
+
+#         return LivroUsuarioSerializer
+
+#     def get_queryset(self):
+#         queryset = LivroUsuario.objects.filter(
+#             usuario=self.request.user
+#         ).select_related("livro")
+
+#         status_filtro = self.request.query_params.get("status")
+
+#         if status_filtro:
+#             queryset = queryset.filter(status=status_filtro)
+
+#         return queryset
+
+#     def perform_create(self, serializer):
+#         serializer.save(usuario=self.request.user)
     
-class MeuLivroDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated]
+# class MeuLivroDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get_serializer_class(self):
-        if self.request.method in ["PATCH", "PUT"]:
-            return LivroUsuarioWriteSerializer
+#     def get_serializer_class(self):
+#         if self.request.method in ["PATCH", "PUT"]:
+#             return LivroUsuarioWriteSerializer
 
-        return LivroUsuarioSerializer
+#         return LivroUsuarioSerializer
 
-    def get_queryset(self):
-        return LivroUsuario.objects.filter(
-            usuario=self.request.user
-        ).select_related("livro")
+#     def get_queryset(self):
+#         return LivroUsuario.objects.filter(
+#             usuario=self.request.user
+#         ).select_related("livro")
 
 
 class LivroGoogleAPIView(APIView):

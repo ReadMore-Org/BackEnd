@@ -26,13 +26,14 @@ from core.views import (
     CategoriaViewSet,
     AutorViewSet,
     LivroViewSet,
+    MeusLivrosViewSet
 )
 
 from core.views.livro import (
     LivroGoogleAPIView,
     ImportarLivroGoogleAPIView,
-    MeusLivrosAPIView,
-    MeuLivroDetailAPIView,
+    # MeusLivrosAPIView,
+    # MeuLivroDetailAPIView,
 )
 from core.views.anuncio import AnuncioViewSet
 
@@ -43,6 +44,7 @@ router.register(r"editoras", EditoraViewSet, basename="editoras")
 router.register(r"categorias", CategoriaViewSet, basename="categorias")
 router.register(r"autores", AutorViewSet, basename="autores")
 router.register(r"livros", LivroViewSet, basename="livros")
+router.register(r"livros-usuario", MeusLivrosViewSet, basename="livros-usuario")
 router.register(r"anuncios", AnuncioViewSet, basename="anuncios")
 
 
@@ -70,16 +72,16 @@ urlpatterns = [
     # API
     path("api/google-books/<str:isbn>/", LivroGoogleAPIView.as_view()),
     path("api/livros/importar-google/", ImportarLivroGoogleAPIView.as_view()),
-    path(
-        "api/livros-usuario/",
-        MeusLivrosAPIView.as_view(),
-        name="meus-livros",
-    ),
-    path(
-        "api/livros-usuario/<int:pk>/",
-        MeuLivroDetailAPIView.as_view(),
-        name="meu-livro-detail",
-    ),
+    # path(
+    #     "api/livros-usuario/",
+    #     MeusLivrosAPIView.as_view(),
+    #     name="meus-livros",
+    # ),
+    # path(
+    #     "api/livros-usuario/<int:pk>/",
+    #     MeuLivroDetailAPIView.as_view(),
+    #     name="meu-livro-detail",
+    # ),
     path("api/", include(router.urls)),
     path("api/uploads/", include(uploader_router.urls)),
 ]

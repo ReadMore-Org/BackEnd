@@ -20,3 +20,6 @@ from .editora import EditoraViewSet as EditoraViewSet
 from .autor import AutorViewSet as AutorViewSet
 from .livro import LivroViewSet as LivroViewSet
 from .anuncio import AnuncioViewSet as AnuncioViewSet
+
+
+from .livro import MeusLivrosViewSet

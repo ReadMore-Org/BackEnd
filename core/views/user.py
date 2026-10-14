@@ -32,6 +32,8 @@ class UserViewSet(ModelViewSet):
 
     permission_classes = [IsAuthenticated]
 
+    http_method_names = ['get', 'patch']
+
     @extend_schema(
         summary="Dados do usuário autenticado",
         description="Retorna os dados do usuário autenticado.",
