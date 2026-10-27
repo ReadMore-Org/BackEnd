@@ -5,6 +5,7 @@ from rest_framework.serializers import (
 )
  
 from core.models import Anuncio, User
+from uploader.helpers.images import image_url
 from core.serializers.livro import LivroRetrieveSerializer
  
  
@@ -15,21 +16,18 @@ class DonoAnuncioSerializer(ModelSerializer):
  
     class Meta:
         model = User
-        fields = ["id", "name", "foto_url"]
+        fields = ["id", "name", "foto_url", "google_picture"]
  
     def get_foto_url(self, obj):
-        if obj.foto and obj.foto.file:
-            request = self.context.get("request")
-            url = obj.foto.file.url
-            return request.build_absolute_uri(url) if request else url
-        return obj.google_picture
+        return image_url(obj.foto, self.context.get("request")) or obj.google_picture
+
  
  
 class DonoAnuncioDetalheSerializer(DonoAnuncioSerializer):
     """Dados do dono na página de detalhe (inclui email e bio)."""
  
     class Meta(DonoAnuncioSerializer.Meta):
-        fields = ["id", "name", "email", "bio", "foto_url"]
+        fields = ["id", "name", "email", "bio", "foto_url", "google_picture"]
  
  
 class AnuncioListSerializer(ModelSerializer):
