@@ -123,6 +123,13 @@ FILE_UPLOAD_PERMISSIONS = 0o640
 if MODE == "DEVELOPMENT":
     MY_IP = os.getenv("MY_IP", "127.0.0.1")
     MEDIA_URL = "/media/"
+    # Uploads locais continuam locais; bancos copiados podem referenciar mídia remota.
+    if os.getenv("CLOUDINARY_URL"):
+        STORAGES = {
+            "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+            "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+            "media_fallback": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        }
 else:
     MEDIA_URL = "/media/"
     CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")

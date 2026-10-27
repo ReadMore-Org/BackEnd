@@ -14,25 +14,62 @@ from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 
-from core.models import User
+from core.models import User, AvaliacaoUsuario, LivroUsuario, Anuncio, InteracaoLivro
+from django.db.models import Avg, Count
+from rest_framework.filters import SearchFilter
+from rest_framework.exceptions import PermissionDenied
+from core.serializers.anuncio import DonoAnuncioDetalheSerializer, AnuncioListSerializer
+from core.serializers.livro_usuario import LivroUsuarioSerializer
+from core.serializers.social import NotaSerializer, FavoritoSerializer
 
 from core.serializers import (
     UserRegistrationSerializer,
-    UserSerializer,
     MeSerializer,
 )
 
 
-class UserViewSet(ModelViewSet):
-    queryset = User.objects.all().order_by("id")
+class UserViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    queryset = User.objects.filter(is_active=True).select_related("foto").order_by("id")
 
-    serializer_class = UserSerializer
+    serializer_class = DonoAnuncioDetalheSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ["name", "email"]
 
     permission_classes = [IsAuthenticated]
 
-    http_method_names = ['get', 'patch']
+    http_method_names = ['get', 'patch', 'post', 'options', 'head']
+
+    def partial_update(self, request, *args, **kwargs):
+        raise PermissionDenied("Edite seu perfil pelo endpoint /usuarios/me/.")
+
+    @action(detail=True, methods=["get"])
+    def perfil(self, request, pk=None):
+        usuario = self.get_object()
+        dados = self.get_serializer(usuario).data
+        resumo = usuario.avaliacoes_recebidas.aggregate(media=Avg("nota"), total=Count("id"))
+        dados.update(resumo)
+        dados["minha_nota"] = usuario.avaliacoes_recebidas.filter(autor=request.user).values_list("nota", flat=True).first()
+        dados["livros"] = LivroUsuarioSerializer(LivroUsuario.objects.filter(usuario=usuario).select_related("livro").prefetch_related("livro__autores", "livro__categoria"), many=True, context=self.get_serializer_context()).data
+        dados["anuncios"] = AnuncioListSerializer(Anuncio.objects.filter(livro_usuario__usuario=usuario, livro_usuario__status__in=["lendo", "lido"]).select_related("livro_usuario__livro", "livro_usuario__usuario__foto"), many=True, context=self.get_serializer_context()).data
+        return Response(dados)
+
+    @action(detail=True, methods=["post"])
+    def avaliar(self, request, pk=None):
+        usuario = self.get_object()
+        if usuario == request.user:
+            return Response({"detail": "Você não pode avaliar seu próprio perfil."}, status=400)
+        serializer = NotaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        AvaliacaoUsuario.objects.update_or_create(autor=request.user, usuario=usuario, defaults=serializer.validated_data)
+        return Response({**usuario.avaliacoes_recebidas.aggregate(media=Avg("nota"), total=Count("id")), "minha_nota": serializer.validated_data["nota"]})
+
+    @action(detail=False, methods=["get"])
+    def favoritos(self, request):
+        queryset = InteracaoLivro.objects.filter(usuario=request.user, favorito=True).select_related("livro__capa").prefetch_related("livro__autores", "livro__categoria").order_by("-id")
+        return Response(FavoritoSerializer(queryset, many=True, context=self.get_serializer_context()).data)
 
     @extend_schema(
         summary="Dados do usuário autenticado",
@@ -49,7 +86,7 @@ class UserViewSet(ModelViewSet):
 
         # GET
         if request.method == "GET":
-            serializer = MeSerializer(user)
+            serializer = MeSerializer(user, context=self.get_serializer_context())
 
             return Response(
                 serializer.data,
@@ -61,6 +98,7 @@ class UserViewSet(ModelViewSet):
             user,
             data=request.data,
             partial=True,
+            context=self.get_serializer_context(),
         )
 
         serializer.is_valid(raise_exception=True)

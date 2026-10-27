@@ -84,19 +84,22 @@ def _parse_data_publicacao(valor):
     return None
 
 
-def importar_livro_google(dados, usuario, status="quero_ler"):
+def importar_livro_google(dados, usuario, status="quero_ler", salvar_na_estante=True):
     isbn = dados.get("isbn") or None
-    livro = Livro.objects.filter(isbn=isbn).first() if isbn else None
+    google_id = dados.get("google_book_id") or None
+    livro = Livro.objects.filter(google_book_id=google_id).first() if google_id else None
+    if not livro and isbn:
+        livro = Livro.objects.filter(isbn=isbn).first()
     if not livro:
         livro = Livro.objects.create(
+            google_book_id=google_id,
             titulo=dados.get("titulo", ""),
             subtitulo=dados.get("subtitulo"),
             isbn=isbn,
             sinopse=dados.get("sinopse"),
             idioma=dados.get("idioma"),
             paginas=dados.get("paginas"),
-            avaliacoes=dados.get("avaliacoes") or 0,
-            nota=dados.get("nota"),
+
             publicacao=_parse_data_publicacao(dados.get("publicacao")),
             editora=_get_or_create_editora(dados.get("editora")),
         )
@@ -111,6 +114,13 @@ def importar_livro_google(dados, usuario, status="quero_ler"):
     elif not livro.categoria.exists():
         # Livro já existia (criado antes, sem categoria): preenche agora
         _set_categorias(livro, dados.get("categorias", []))
+
+    if google_id and not livro.google_book_id:
+        livro.google_book_id = google_id
+        livro.save(update_fields=["google_book_id"])
+
+    if not salvar_na_estante:
+        return livro
 
     livro_usuario, criado = LivroUsuario.objects.get_or_create(
         usuario=usuario,

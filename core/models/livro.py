@@ -23,6 +23,8 @@ class Livro(models.Model):
     ]
 
     
+    google_book_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
+
     titulo = models.CharField(max_length=260, blank=True)
     subtitulo = models.CharField(max_length=260, blank=True, null=True)
     isbn = models.CharField(max_length=13, validators=[isbn_validador], unique=True, blank=True, null=True)
