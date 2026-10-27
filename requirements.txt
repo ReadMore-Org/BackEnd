@@ -2,11 +2,15 @@
 # Please do not edit it manually.
 asgiref==3.11.1
 attrs==26.1.0
+autobahn==24.4.2
 certifi==2026.2.25
 cffi==2.0.0; platform_python_implementation != "PyPy"
+channels==4.3.2
+channels-redis==4.2.1
 charset-normalizer==3.4.7
 cloudinary==1.44.1
 cryptography==48.0.0
+daphne==4.2.1
 dj-database-url==3.1.2
 django==6.0.6
 django-cloudinary-storage==0.3.0
@@ -19,30 +23,31 @@ djangorestframework-simplejwt==5.5.1
 dotenv==0.9.9
 drf-spectacular==0.29.0
 google-auth==2.53.0
-gunicorn==23.0.0
 graphviz==0.21
+gunicorn==23.0.0
 idna==3.11
 inflection==0.5.1
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 pillow==12.2.0
+psycopg2-binary==2.9.10
 pyasn1==0.6.3
 pyasn1-modules==0.4.2
 pycparser==3.0; implementation_name != "PyPy" and platform_python_implementation != "PyPy"
 pydotplus==2.0.2
 pyjwt==2.12.1
 pyparsing==3.3.2
+python-decouple==3.8
 python-dotenv==1.2.2
 python-magic==0.4.27
 pyyaml==6.0.3
-psycopg2-binary==2.9.10
 referencing==0.37.0
 requests==2.33.1
 rpds-py==0.30.0
 six==1.17.0
 sqlparse==0.5.5
+twisted==25.5.0
 typing-extensions==4.15.0; python_version < "3.13"
 uritemplate==4.2.0
 urllib3==2.6.3
 whitenoise==6.12.0
-python-decouple==3.8
