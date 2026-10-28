@@ -82,6 +82,7 @@ urlpatterns = [
     #     MeuLivroDetailAPIView.as_view(),
     #     name="meu-livro-detail",
     # ),
+    path("api/chat/", include("chat.urls")),
     path("api/", include(router.urls)),
     path("api/uploads/", include(uploader_router.urls)),
 ]

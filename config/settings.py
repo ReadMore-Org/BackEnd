@@ -30,6 +30,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Aplicações instaladas
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     "cloudinary_storage",
     "cloudinary",
     "corsheaders",
+    "channels",
     "django_extensions",
     "django_filters",
     "drf_spectacular",
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     "core",
     "config",
     "uploader",
+    "chat",
 ]
 
 MIDDLEWARE = [
@@ -169,6 +172,25 @@ SIMPLE_JWT = {
     ),  # Tokens de atualização expiram em 1 dia
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# Django Channels (chat em tempo real por WebSocket)
+ASGI_APPLICATION = "config.asgi.application"
+
+# Sem REDIS_URL usa a camada em memória, que só funciona com um único processo (o daphne do Procfile).
+REDIS_URL = os.getenv("REDIS_URL")
+
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [{"address": REDIS_URL, "socket_timeout": None}]},
+        }
+    }
+else:
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
+# Tamanho máximo dos anexos do chat, em MB
+CHAT_MAX_UPLOAD_MB = int(os.getenv("CHAT_MAX_UPLOAD_MB", "10"))
 
 # Exibe as configurações principais para verificação
 print(f"{MODE = } \n{MEDIA_URL = } \n{DATABASES = }")
