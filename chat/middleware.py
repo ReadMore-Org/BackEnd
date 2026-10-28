@@ -3,6 +3,7 @@
 Evite logar URLs de WebSocket, já que o token vai nelas.
 """
 
+import logging
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
@@ -11,6 +12,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import AccessToken
+
+logger = logging.getLogger("chat")
 
 
 class JWTAuthMiddleware(BaseMiddleware):
@@ -27,16 +30,27 @@ class JWTAuthMiddleware(BaseMiddleware):
             token = self._get_token(scope)
 
             if not token:
+                logger.warning("WS recusado: conexão sem token.")
+
                 return AnonymousUser()
 
             user_id = AccessToken(token).get("user_id")
 
             if not user_id:
+                logger.warning("WS recusado: token sem user_id.")
+
                 return AnonymousUser()
 
             return User.objects.get(id=user_id, is_active=True)
 
-        except (InvalidToken, TokenError, User.DoesNotExist, KeyError, ValueError):
+        except (InvalidToken, TokenError) as error:
+            # Nunca loga o token, só o motivo.
+            logger.warning("WS recusado: token inválido ou expirado (%s).", error)
+
+            return AnonymousUser()
+        except (User.DoesNotExist, KeyError, ValueError):
+            logger.warning("WS recusado: usuário do token não existe ou está inativo.")
+
             return AnonymousUser()
 
     @staticmethod
