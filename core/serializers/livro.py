@@ -22,6 +22,17 @@ class ResumoAvaliacoesMixin:
         resumo = instance.interacoes.filter(nota__isnull=False).aggregate(media=Avg("nota"), total=Count("id"))
         data["nota"] = round(resumo["media"], 1) if resumo["total"] else None
         data["avaliacoes"] = resumo["total"]
+        # A imagem original pode ser usada mesmo se a cópia de mídia estiver ausente.
+        from urllib.parse import urlencode
+        if instance.google_book_id:
+            params = {"id": instance.google_book_id}
+        elif instance.isbn:
+            params = {"vid": f"ISBN{instance.isbn}"}
+        else:
+            params = None
+        data["capa_google"] = ("https://books.google.com/books/content?" + urlencode({
+            **params, "printsec": "frontcover", "img": 1, "zoom": 1, "source": "gbs_api",
+        })) if params else None
         return data
 
 

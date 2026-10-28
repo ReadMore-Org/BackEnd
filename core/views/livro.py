@@ -129,6 +129,58 @@ class LivroViewSet(ModelViewSet):
                 "livro_usuario": LivroUsuarioSerializer(vinculo, context=self.get_serializer_context()).data,
             }, status=201)
 
+    @action(detail=False, methods=["get"], url_path="capa-google", permission_classes=[AllowAny])
+    def capa_google(self, request):
+        from django.http import HttpResponse
+        from core.services.book_covers import get_google_cover, CoverUnavailable
+        try:
+            content, mime = get_google_cover(request.query_params.get("url", ""))
+            response = HttpResponse(content, content_type=mime)
+            response["Cache-Control"] = "public, max-age=86400"
+            response["X-Content-Type-Options"] = "nosniff"
+            return response
+        except CoverUnavailable:
+            return Response({"detail": "Capa indisponível."}, status=404)
+
+    @action(detail=False, methods=["get"], url_path="catalogo-edicao", permission_classes=[AllowAny])
+    def catalogo_edicao(self, request):
+        from core.services.recommendations import get_recommended_edition, CatalogUnavailable
+        try:
+            return Response(get_recommended_edition(request.query_params.get("isbn", "")))
+        except ValueError:
+            return Response({"detail": "Informe um ISBN válido."}, status=400)
+        except CatalogUnavailable:
+            return Response({"detail": "Não foi possível carregar esta edição agora."}, status=503)
+
+    @action(detail=False, methods=["get"], url_path="catalogo-recomendados", permission_classes=[AllowAny])
+    def catalogo_recomendados(self, request):
+        from core.services.recommendations import search_recommended_books, CatalogUnavailable
+        title = request.query_params.get("titulo", "").strip()
+        author = request.query_params.get("autor", "").strip()
+        if not title or not author or len(title) > 260 or len(author) > 150:
+            return Response({"detail": "Informe título e autor válidos."}, status=400)
+        try:
+            return Response(search_recommended_books(title, author))
+        except CatalogUnavailable as exc:
+            return Response({"detail": "Catálogo externo temporariamente indisponível."}, status=exc.status)
+
+    @action(detail=False, methods=["get"], permission_classes=[AllowAny])
+    def recomendados(self, request):
+        # Consulta apenas o catálogo persistido: funciona mesmo sem Google Books.
+        titulos = request.query_params.getlist("titulo")
+        if not titulos or len(titulos) > 120 or any(len(titulo) > 260 for titulo in titulos):
+            return Response({"detail": "Informe de 1 a 120 títulos válidos."}, status=400)
+        filtro = Q()
+        for titulo in titulos:
+            if titulo.strip():
+                filtro |= Q(titulo__istartswith=titulo.strip()) | Q(titulo__startswith=titulo.strip().upper())
+        if not filtro:
+            return Response([])
+        livros = Livro.objects.filter(filtro).select_related("capa").prefetch_related(
+            "autores", "categoria"
+        ).annotate(total_leitores=Count("usuarios", distinct=True)).order_by("-total_leitores", "id")[:240]
+        return Response(self.get_serializer(livros, many=True).data)
+
     @action(detail=False, methods=["get"], permission_classes=[AllowAny])
     def avaliacoes(self, request):
         # Consulta em lote para os cards do catálogo externo, sem importar livros.
