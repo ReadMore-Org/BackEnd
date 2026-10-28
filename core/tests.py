@@ -262,3 +262,208 @@ class ManualBookTests(TestCase):
     def test_malformed_body_returns_validation_error(self):
         response = self.client.post(self.url, [], format='json')
         self.assertEqual(response.status_code, 400)
+
+
+class RecomendadosLocaisTests(TestCase):
+    def test_catalogo_local_independe_do_google_e_preserva_identidade(self):
+        from core.models import Autor
+        livro = Livro.objects.create(titulo='Dom Casmurro', google_book_id='google-salvo')
+        livro.autores.add(Autor.objects.create(nome='Machado de Assis'))
+        Livro.objects.create(titulo='Outro livro')
+        client = APIClient()
+        response = client.get('/api/livros/recomendados/', {'titulo': ['Dom Casmurro', '1984']})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['id'], livro.id)
+        self.assertEqual(response.data[0]['google_book_id'], 'google-salvo')
+        self.assertEqual(response.data[0]['autores'][0]['nome'], 'Machado de Assis')
+
+    def test_rejeita_consulta_sem_titulos_e_listas_grandes(self):
+        client = APIClient()
+        self.assertEqual(client.get('/api/livros/recomendados/').status_code, 400)
+        self.assertEqual(client.get('/api/livros/recomendados/', {'titulo': ['x'] * 121}).status_code, 400)
+
+
+class CatalogoRecomendadosTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def tearDown(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def test_consulta_google_usa_chave_do_servidor_e_cache_compartilhado(self):
+        from unittest.mock import Mock, patch
+        response = Mock()
+        response.json.return_value = {'items': [{'id': 'real-id', 'volumeInfo': {'title': 'Dom Casmurro', 'authors': ['Machado de Assis']}}]}
+        with patch('core.services.recommendations.requests.get', return_value=response) as get:
+            client = APIClient()
+            params = {'titulo': 'Dom Casmurro', 'autor': 'Machado de Assis'}
+            first = client.get('/api/livros/catalogo-recomendados/', params)
+            second = client.get('/api/livros/catalogo-recomendados/', params)
+            self.assertEqual(first.status_code, 200)
+            self.assertEqual(second.data, first.data)
+            self.assertEqual(get.call_count, 1)
+            self.assertIn('key', get.call_args.kwargs['params'])
+
+    def test_503_interrompe_consultas_sem_descartar_cache_de_outras_obras(self):
+        from unittest.mock import Mock, patch
+        import requests
+        from core.services.recommendations import search_recommended_books, CatalogUnavailable
+        response = Mock(status_code=503)
+        error = requests.HTTPError(response=response)
+        with patch('core.services.recommendations.requests.get', side_effect=error) as get:
+            for title in ['1984', 'O Hobbit']:
+                with self.assertRaises(CatalogUnavailable):
+                    search_recommended_books(title, 'Autor')
+            self.assertEqual(get.call_count, 3)
+
+    def test_serializer_oferece_capa_google_mesmo_sem_arquivo_local(self):
+        from core.serializers import LivroSerializer
+        livro = Livro.objects.create(titulo='Livro', google_book_id='volume-real')
+        data = LivroSerializer(livro).data
+        self.assertIsNone(data['capa'])
+        self.assertIn('id=volume-real', data['capa_google'])
+
+    def test_edicoes_com_subtitulo_sao_consultadas(self):
+        livro = Livro.objects.create(titulo='Dona Flor e seus dois maridos (Edição de bolso)')
+        response = APIClient().get('/api/livros/recomendados/', {'titulo': ['Dona Flor e Seus Dois Maridos']})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data[0]['id'], livro.id)
+
+
+class CatalogoAlternativoTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def tearDown(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def external_response(self, url, **kwargs):
+        from unittest.mock import Mock
+        import requests
+        if 'googleapis' in url:
+            raise requests.HTTPError(response=Mock(status_code=503))
+        response = Mock()
+        if url.endswith('/search.json'):
+            response.json.return_value = {'docs': [{
+                'author_name': ['George Orwell'], 'editions': {'docs': [{
+                    'key': '/books/OL123M', 'title': '1984', 'language': ['por'],
+                }]},
+            }]}
+        elif '/books/' in url:
+            response.json.return_value = {'title': '1984', 'isbn_13': ['9780451524935'],
+                'languages': [{'key': '/languages/por'}], 'covers': [123], 'number_of_pages': 320}
+        else:
+            raise AssertionError(url)
+        return response
+
+    def test_google_503_nao_bloqueia_fonte_alternativa_e_detalhes(self):
+        from unittest.mock import patch
+        client = APIClient()
+        with patch('core.services.recommendations.requests.get', side_effect=self.external_response) as get:
+            response = client.get('/api/livros/catalogo-recomendados/', {'titulo': '1984', 'autor': 'George Orwell'})
+            self.assertEqual(response.status_code, 200)
+            book = response.data['items'][0]
+            self.assertEqual(book['id'], 'isbn:9780451524935')
+            self.assertEqual(book['source'], 'openlibrary')
+            self.assertEqual(book['volumeInfo']['language'], 'pt')
+            self.assertIn('vid=ISBN9780451524935', book['googleCover'])
+            calls = get.call_count
+            details = client.get('/api/livros/catalogo-edicao/', {'isbn': '9780451524935'})
+            self.assertEqual(details.data, book)
+            self.assertEqual(get.call_count, calls)
+
+    def test_google_em_cooldown_ainda_consulta_fonte_alternativa(self):
+        from unittest.mock import patch
+        from django.core.cache import cache
+        cache.set('recommended-google-unavailable', True, 60)
+        with patch('core.services.recommendations.requests.get', side_effect=self.external_response) as get:
+            response = APIClient().get('/api/livros/catalogo-recomendados/', {'titulo': '1984', 'autor': 'George Orwell'})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(get.call_count, 2)
+            self.assertTrue(all('googleapis' not in call.args[0] for call in get.call_args_list))
+
+    def test_edicao_alternativa_pode_ser_adicionada_sem_id_google(self):
+        user = User.objects.create_user('catalog@example.com', 'password123', name='Leitor')
+        client = APIClient()
+        client.force_authenticate(user)
+        payload = {'titulo': '1984', 'isbn': '9780451524935', 'google_book_id': None,
+                   'autores': ['George Orwell'], 'idioma': 'pt', 'status': 'quero_ler'}
+        first = client.post('/api/livros/importar-google/', payload, format='json')
+        second = client.post('/api/livros/importar-interacao/', payload, format='json')
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(Livro.objects.count(), 1)
+        self.assertEqual(LivroUsuario.objects.count(), 1)
+        self.assertIsNone(Livro.objects.get().google_book_id)
+        self.assertEqual(Livro.objects.get().isbn, payload['isbn'])
+
+    def test_edicao_sem_identificador_valido_nao_e_inventada(self):
+        from core.services.recommendations import _edition_volume
+        self.assertIsNone(_edition_volume({'title': '1984', 'isbn_13': ['9780451524936']}, ['George Orwell']))
+
+
+class CapasGoogleTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        from PIL import Image, ImageDraw
+        from io import BytesIO
+        cache.clear()
+        placeholder = Image.new('RGB', (128, 196), 'white')
+        ImageDraw.Draw(placeholder).text((10, 80), 'Image not available', fill='gray')
+        cover = Image.new('RGB', (128, 196), 'navy')
+        ImageDraw.Draw(cover).text((10, 80), 'Livro real', fill='white')
+        def png(image):
+            output = BytesIO()
+            image.save(output, format='PNG')
+            return output.getvalue()
+        self.placeholder = png(placeholder)
+        self.cover = png(cover)
+
+    def tearDown(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def response(self, content):
+        from unittest.mock import Mock
+        response = Mock(status_code=200, content=content, headers={})
+        return response
+
+    def test_placeholder_http_200_e_substituido_pela_capa_padrao(self):
+        from unittest.mock import patch
+        from pathlib import Path
+        from core.services import book_covers
+        default = (Path(book_covers.__file__).resolve().parents[1] / 'static/core/livro_sem_capa.png').read_bytes()
+        with patch('core.services.book_covers.requests.get', return_value=self.response(self.placeholder)) as get:
+            response = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=missing&img=1'})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, default)
+            calls = get.call_count
+            again = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=missing&img=1'})
+            self.assertEqual(again.content, default)
+            self.assertEqual(get.call_count, calls)
+
+    def test_capa_real_com_mesmas_dimensoes_do_placeholder_e_preservada(self):
+        from unittest.mock import patch
+        def get(url, **kwargs):
+            return self.response(self.placeholder if 'ISBN0000000000' in url or 'no_cover_thumb' in url else self.cover)
+        with patch('core.services.book_covers.requests.get', side_effect=get):
+            response = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=real&img=1'})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.content, self.cover)
+            self.assertEqual(response['Content-Type'], 'image/png')
+
+    def test_urls_externas_e_redirecionamentos_fora_do_google_sao_recusados(self):
+        from unittest.mock import Mock, patch
+        with patch('core.services.book_covers.requests.get') as get:
+            response = APIClient().get('/api/livros/capa-google/', {'url': 'http://127.0.0.1/private'})
+            self.assertEqual(response.status_code, 404)
+            get.assert_not_called()
+        with patch('core.services.book_covers.requests.get', return_value=Mock(status_code=302, headers={'Location': 'http://127.0.0.1/private'})) as get:
+            response = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=real'})
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(get.call_count, 1)

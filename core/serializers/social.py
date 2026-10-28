@@ -25,6 +25,11 @@ class FavoritoSerializer(serializers.ModelSerializer):
 
 
 class ImportarInteracaoSerializer(serializers.Serializer):
-    google_book_id = serializers.CharField(max_length=100)
+    google_book_id = serializers.CharField(max_length=100, required=False, allow_null=True)
     titulo = serializers.CharField(max_length=260)
     isbn = serializers.CharField(max_length=13, required=False, allow_null=True)
+
+    def validate(self, attrs):
+        if not attrs.get("google_book_id") and not attrs.get("isbn"):
+            raise serializers.ValidationError("Informe o identificador do catálogo ou o ISBN da edição.")
+        return attrs
