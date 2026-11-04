@@ -319,6 +319,17 @@ class CatalogoRecomendadosTests(TestCase):
                     search_recommended_books(title, 'Autor')
             self.assertEqual(get.call_count, 3)
 
+    def test_resultado_vazio_e_reutilizado_sem_repetir_consultas_externas(self):
+        from unittest.mock import patch
+        from core.services.recommendations import search_recommended_books
+        with patch('core.services.recommendations._get_json', return_value={'items': []}), patch(
+            'core.services.recommendations._search_openlibrary', return_value={'items': [], 'source': 'openlibrary'}
+        ) as alternative:
+            first = search_recommended_books('Obra sem edição', 'Autor')
+            second = search_recommended_books('Obra sem edição', 'Autor')
+            self.assertEqual(first, second)
+            alternative.assert_called_once()
+
     def test_serializer_oferece_capa_google_mesmo_sem_arquivo_local(self):
         from core.serializers import LivroSerializer
         livro = Livro.objects.create(titulo='Livro', google_book_id='volume-real')
@@ -413,9 +424,9 @@ class CapasGoogleTests(TestCase):
         from PIL import Image, ImageDraw
         from io import BytesIO
         cache.clear()
-        placeholder = Image.new('RGB', (128, 196), 'white')
-        ImageDraw.Draw(placeholder).text((10, 80), 'Image not available', fill='gray')
-        cover = Image.new('RGB', (128, 196), 'navy')
+        from pathlib import Path
+        placeholder = Image.open(Path(__file__).resolve().parent / 'static/core/cover_placeholders/unavailable.png').convert('RGB')
+        cover = Image.new('RGB', placeholder.size, 'navy')
         ImageDraw.Draw(cover).text((10, 80), 'Livro real', fill='white')
         def png(image):
             output = BytesIO()
@@ -433,29 +444,71 @@ class CapasGoogleTests(TestCase):
         response = Mock(status_code=200, content=content, headers={})
         return response
 
-    def test_placeholder_http_200_e_substituido_pela_capa_padrao(self):
+    def test_placeholder_http_200_permite_tentar_outra_fonte(self):
         from unittest.mock import patch
-        from pathlib import Path
         from core.services import book_covers
-        default = (Path(book_covers.__file__).resolve().parents[1] / 'static/core/livro_sem_capa.png').read_bytes()
         with patch('core.services.book_covers.requests.get', return_value=self.response(self.placeholder)) as get:
             response = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=missing&img=1'})
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.content, default)
+            self.assertEqual(response.status_code, 404)
             calls = get.call_count
             again = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=missing&img=1'})
-            self.assertEqual(again.content, default)
+            self.assertEqual(again.status_code, 404)
             self.assertEqual(get.call_count, calls)
+
+    def test_placeholder_redimensionado_e_recusado_sem_consultar_referencias_na_rede(self):
+        from unittest.mock import patch
+        from io import BytesIO
+        from PIL import Image
+        from core.services import book_covers
+        with Image.open(BytesIO(self.placeholder)) as image:
+            output = BytesIO()
+            image.resize((360, 520)).save(output, 'JPEG', quality=85)
+        with patch('core.services.book_covers.requests.get', return_value=self.response(output.getvalue())) as get:
+            with self.assertRaises(book_covers.CoverUnavailable):
+                book_covers.get_google_cover('https://books.google.com/books/content?id=missing&img=1&zoom=5')
+            self.assertEqual(get.call_count, 1)
 
     def test_capa_real_com_mesmas_dimensoes_do_placeholder_e_preservada(self):
         from unittest.mock import patch
         def get(url, **kwargs):
-            return self.response(self.placeholder if 'ISBN0000000000' in url or 'no_cover_thumb' in url else self.cover)
+            return self.response(self.placeholder if 'ISBN0000000000' in url or '/no_cover' in url else self.cover)
         with patch('core.services.book_covers.requests.get', side_effect=get):
             response = APIClient().get('/api/livros/capa-google/', {'url': 'https://books.google.com/books/content?id=real&img=1'})
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.content, self.cover)
             self.assertEqual(response['Content-Type'], 'image/png')
+
+    def test_imagens_da_captura_sao_substituidas_sem_depender_de_referencia_remota(self):
+        from unittest.mock import patch
+        from pathlib import Path
+        from io import BytesIO
+        from PIL import Image
+        from core.services import book_covers
+        root = Path(book_covers.__file__).resolve().parents[1] / 'static/core'
+        for name in ['gray', 'unavailable']:
+            for size in [(180, 260), (360, 520), (128, 185)]:
+                with self.subTest(name=name, size=size):
+                    with Image.open(root / 'cover_placeholders' / f'{name}.png') as image:
+                        output = BytesIO()
+                        image.resize(size).save(output, 'JPEG', quality=85)
+                    with patch('core.services.book_covers.requests.get', return_value=self.response(output.getvalue())), patch(
+                        'core.services.book_covers._placeholder_references', side_effect=AssertionError('Não deve consultar referências remotas')
+                    ):
+                        response = APIClient().get('/api/livros/capa-google/', {
+                            'url': f'https://covers.openlibrary.org/b/id/{name}-{size[0]}-L.jpg?default=false',
+                        })
+                        self.assertEqual(response.status_code, 404)
+
+    def test_capas_reais_brancas_cinzas_e_padrao_do_site_sao_preservadas(self):
+        from pathlib import Path
+        from PIL import Image, ImageDraw
+        from core.services import book_covers
+        for color in ['white', 'gray']:
+            image = Image.new('RGB', (180, 260), color)
+            ImageDraw.Draw(image).text((15, 120), 'Uma capa real', fill='black')
+            self.assertFalse(book_covers.matches_known_placeholder(image))
+        with Image.open(Path(book_covers.__file__).resolve().parents[1] / 'static/core/livro_sem_capa.png') as image:
+            self.assertFalse(book_covers.matches_known_placeholder(image))
 
     def test_urls_externas_e_redirecionamentos_fora_do_google_sao_recusados(self):
         from unittest.mock import Mock, patch
