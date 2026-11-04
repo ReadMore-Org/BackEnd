@@ -171,8 +171,9 @@ def search_recommended_books(title, author):
     # O bloqueio temporário do Google nunca bloqueia a fonte alternativa.
     try:
         result = _search_openlibrary(title, author)
-        if result.get('items'):
-            cache.set(key, result, CACHE_SECONDS)
+        # Uma resposta vazia válida também pode ser reutilizada brevemente.
+        # Falhas continuam fora do cache para permitir uma nova tentativa.
+        cache.set(key, result, CACHE_SECONDS if result.get('items') else 300)
         return result
     except (requests.RequestException, ValueError) as exc:
         status = getattr(getattr(google_error or exc, 'response', None), 'status_code', None) or 503

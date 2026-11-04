@@ -67,6 +67,30 @@ class MeSerializer(ModelSerializer):
             "foto_attachment_key",
             "google_picture",
             "show_onboarding",
+            "reading_preferences",
+            "reading_preferences_status",
         ]
 
-        read_only_fields = ["id", "email"]
+        read_only_fields = ["id", "email", "reading_preferences", "reading_preferences_status"]
+
+
+class PreferredBookSerializer(serializers.Serializer):
+    id = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    title = serializers.CharField(max_length=260)
+    authors = serializers.ListField(child=serializers.CharField(max_length=150), max_length=10)
+    source = serializers.ChoiceField(choices=['local', 'google', 'openlibrary'], default='google')
+    isbn = serializers.CharField(max_length=20, required=False, allow_blank=True, allow_null=True)
+
+
+class ReadingPreferencesSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=['completed', 'skipped'])
+    categories = serializers.ListField(child=serializers.CharField(max_length=80), max_length=100, default=list)
+    authors = serializers.ListField(child=serializers.CharField(max_length=150), max_length=100, default=list)
+    books = PreferredBookSerializer(many=True, max_length=100, default=list)
+
+    def validate(self, data):
+        for key in ('categories', 'authors'):
+            data[key] = list(dict.fromkeys(data[key]))
+        if data['status'] == 'skipped':
+            data.update(categories=[], authors=[], books=[])
+        return data
