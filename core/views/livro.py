@@ -160,7 +160,7 @@ class LivroViewSet(ModelViewSet):
         if not title or not author or len(title) > 260 or len(author) > 150:
             return Response({"detail": "Informe título e autor válidos."}, status=400)
         try:
-            return Response(search_recommended_books(title, author))
+            return Response(search_recommended_books(title, author, retry_empty=request.query_params.get("retry_empty") == "1"))
         except CatalogUnavailable as exc:
             return Response({"detail": "Catálogo externo temporariamente indisponível."}, status=exc.status)
 

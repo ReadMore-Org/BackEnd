@@ -381,6 +381,24 @@ class CatalogoRecomendadosTests(TestCase):
                     search_recommended_books(title, 'Autor')
             self.assertEqual(get.call_count, 3)
 
+    def test_nova_tentativa_reconsulta_vazios_mas_preserva_cache_de_livros_validos(self):
+        from unittest.mock import patch
+        volume = {'items': [{'id': 'real-id', 'volumeInfo': {'title': '1984', 'authors': ['George Orwell']}}]}
+        with patch('core.services.recommendations._get_json', side_effect=[{'items': []}, volume]) as google, patch(
+            'core.services.recommendations._search_openlibrary', return_value={'items': [], 'source': 'openlibrary'}
+        ):
+            client = APIClient()
+            params = {'titulo': '1984', 'autor': 'George Orwell'}
+            self.assertEqual(client.get('/api/livros/catalogo-recomendados/', params).data['items'], [])
+            self.assertEqual(client.get('/api/livros/catalogo-recomendados/', params).data['items'], [])
+            self.assertEqual(google.call_count, 1)
+            params['retry_empty'] = '1'
+            response = client.get('/api/livros/catalogo-recomendados/', params)
+            self.assertEqual(response.data['items'][0]['id'], 'real-id')
+            self.assertEqual(google.call_count, 2)
+            self.assertEqual(client.get('/api/livros/catalogo-recomendados/', params).data, response.data)
+            self.assertEqual(google.call_count, 2)
+
     def test_resultado_vazio_e_reutilizado_sem_repetir_consultas_externas(self):
         from unittest.mock import patch
         from core.services.recommendations import search_recommended_books

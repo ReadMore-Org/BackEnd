@@ -151,10 +151,10 @@ def get_recommended_edition(isbn):
         raise CatalogUnavailable() from exc
 
 
-def search_recommended_books(title, author):
+def search_recommended_books(title, author, *, retry_empty=False):
     key = 'recommended-volume-v2:' + hashlib.sha256(f'{title}|{author}'.encode()).hexdigest()
     cached = cache.get(key)
-    if cached is not None:
+    if cached is not None and (not retry_empty or cached.get("items")):
         return cached
     deadline = time.monotonic() + 5.5
     google_error = None
