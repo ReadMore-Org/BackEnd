@@ -287,6 +287,33 @@ class RecomendadosLocaisTests(TestCase):
         self.assertEqual(response.data[0]['google_book_id'], 'google-salvo')
         self.assertEqual(response.data[0]['autores'][0]['nome'], 'Machado de Assis')
 
+    def test_consultas_nao_crescem_por_livro_e_medias_continuam_corretas(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from core.models import Autor
+        users = [User.objects.create_user(f'reader{i}@example.com') for i in range(2)]
+        author = Autor.objects.create(nome='Autor')
+        def create_book(index):
+            book = Livro.objects.create(titulo=f'Livro {index}')
+            book.autores.add(author)
+            for user, nota in zip(users, [3, 5]):
+                LivroUsuario.objects.create(usuario=user, livro=book, status='lido')
+                InteracaoLivro.objects.create(usuario=user, livro=book, nota=nota)
+            return book
+        create_book(0)
+        client = APIClient()
+        with CaptureQueriesContext(connection) as first:
+            response = client.get('/api/livros/recomendados/', {'titulo': ['Livro']})
+        for index in range(1, 15): create_book(index)
+        with CaptureQueriesContext(connection) as larger:
+            response = client.get('/api/livros/recomendados/', {'titulo': ['Livro']})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 15)
+        self.assertLessEqual(len(larger), len(first))
+        for book in response.data:
+            self.assertEqual(book['nota'], 4)
+            self.assertEqual(book['avaliacoes'], 2)
+
     def test_rejeita_consulta_sem_titulos_e_listas_grandes(self):
         client = APIClient()
         self.assertEqual(client.get('/api/livros/recomendados/').status_code, 400)
@@ -301,6 +328,32 @@ class CatalogoRecomendadosTests(TestCase):
     def tearDown(self):
         from django.core.cache import cache
         cache.clear()
+
+    def test_fontes_compartilham_prazo_e_nao_iniciam_chamadas_apos_esgotar_tempo(self):
+        import requests
+        from unittest.mock import patch
+        from core.services.recommendations import _get_json
+        with patch('core.services.recommendations.time.monotonic', return_value=10), patch(
+            'core.services.recommendations.requests.get'
+        ) as get:
+            with self.assertRaises(requests.Timeout):
+                _get_json('https://www.googleapis.com/books/v1/volumes', deadline=9)
+            get.assert_not_called()
+            get.return_value.json.return_value = {}
+            _get_json('https://www.googleapis.com/books/v1/volumes', deadline=10.5)
+            self.assertEqual(get.call_args.kwargs['timeout'], 0.5)
+
+    def test_fila_lenta_nao_reserva_mais_trabalho_apos_o_prazo(self):
+        import requests
+        from unittest.mock import patch
+        from core.services import recommendations
+        with patch.object(recommendations.time, 'monotonic', return_value=10), patch.object(
+            recommendations, '_next_openlibrary_request', 20
+        ), patch.object(recommendations.requests, 'get') as get:
+            with self.assertRaises(requests.Timeout):
+                recommendations._get_json('https://openlibrary.org/search.json', deadline=11)
+            self.assertEqual(recommendations._next_openlibrary_request, 20)
+            get.assert_not_called()
 
     def test_consulta_google_usa_chave_do_servidor_e_cache_compartilhado(self):
         from unittest.mock import Mock, patch

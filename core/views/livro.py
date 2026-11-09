@@ -178,7 +178,11 @@ class LivroViewSet(ModelViewSet):
             return Response([])
         livros = Livro.objects.filter(filtro).select_related("capa").prefetch_related(
             "autores", "categoria"
-        ).annotate(total_leitores=Count("usuarios", distinct=True)).order_by("-total_leitores", "id")[:240]
+        ).annotate(
+            total_leitores=Count("usuarios", distinct=True),
+            recomendados_media=Avg("interacoes__nota"),
+            recomendados_total=Count("interacoes", filter=Q(interacoes__nota__isnull=False), distinct=True),
+        ).order_by("-total_leitores", "id")[:240]
         return Response(self.get_serializer(livros, many=True).data)
 
     @action(detail=False, methods=["get"], permission_classes=[AllowAny])

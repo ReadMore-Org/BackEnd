@@ -34,17 +34,25 @@ def _matches(title, authors, expected, author):
     return (actual == _normalize(expected) or base == _normalize(expected)) and all(w in names for w in words)
 
 
-def _get_json(url, params=None):
+def _get_json(url, params=None, *, deadline=None):
+    def remaining():
+        value = deadline - time.monotonic() if deadline is not None else 5
+        if value <= 0:
+            raise requests.Timeout('Recommendation deadline exceeded')
+        return value
     if url.startswith('https://openlibrary.org/'):
         # Limita a três consultas por segundo, inclusive entre requisições concorrentes.
         global _next_openlibrary_request
         with _openlibrary_lock:
             now = time.monotonic()
             delay = max(0, _next_openlibrary_request - now)
+            if deadline is not None and now + delay >= deadline:
+                raise requests.Timeout('Catalog queue exceeded deadline')
             _next_openlibrary_request = max(now, _next_openlibrary_request) + 0.35
         if delay:
             time.sleep(delay)
-    response = requests.get(url, params=params, headers=HEADERS, timeout=5)
+    timeout = min(2, remaining()) if deadline is not None else 5
+    response = requests.get(url, params=params, headers=HEADERS, timeout=timeout)
     response.raise_for_status()
     data = response.json()
     if not isinstance(data, dict):
@@ -96,12 +104,12 @@ def _edition_volume(edition, authors):
     return volume
 
 
-def _search_openlibrary(title, author):
+def _search_openlibrary(title, author, *, deadline=None):
     escaped_title = title.replace('\\', '\\\\').replace('"', '\\"')
     data = _get_json('https://openlibrary.org/search.json', {
         'q': f'"{escaped_title}" language:por', 'author': author, 'lang': 'pt', 'limit': 5,
         'fields': 'key,title,author_name,editions,editions.key,editions.title,editions.language',
-    })
+    }, deadline=deadline)
     for work in data.get('docs', []):
         authors = work.get('author_name', [])
         for edition in work.get('editions', {}).get('docs', []):
@@ -110,7 +118,7 @@ def _search_openlibrary(title, author):
             key = edition.get('key', '')
             if not re.fullmatch(r'/books/OL\d+M', key):
                 continue
-            details = _get_json(f'https://openlibrary.org{key}.json')
+            details = _get_json(f'https://openlibrary.org{key}.json', deadline=deadline)
             if not _matches(details.get('title', ''), authors, title, author):
                 continue
             volume = _edition_volume(details, authors)
@@ -148,13 +156,14 @@ def search_recommended_books(title, author):
     cached = cache.get(key)
     if cached is not None:
         return cached
+    deadline = time.monotonic() + 5.5
     google_error = None
     if not cache.get('recommended-google-unavailable'):
         try:
             data = _get_json('https://www.googleapis.com/books/v1/volumes', {
                 'q': f'{title} {author}', 'key': settings.GOOGLE_BOOKS_API_KEY,
                 'printType': 'books', 'maxResults': 20, 'langRestrict': 'pt', 'orderBy': 'relevance',
-            })
+            }, deadline=deadline)
             items = data.get('items', [])
             if not isinstance(items, list):
                 raise ValueError('Invalid catalog response')
@@ -170,7 +179,7 @@ def search_recommended_books(title, author):
             cache.set('recommended-google-unavailable', True, 60)
     # O bloqueio temporário do Google nunca bloqueia a fonte alternativa.
     try:
-        result = _search_openlibrary(title, author)
+        result = _search_openlibrary(title, author, deadline=deadline)
         # Uma resposta vazia válida também pode ser reutilizada brevemente.
         # Falhas continuam fora do cache para permitir uma nova tentativa.
         cache.set(key, result, CACHE_SECONDS if result.get('items') else 300)

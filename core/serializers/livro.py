@@ -19,7 +19,10 @@ class ResumoAvaliacoesMixin:
     def to_representation(self, instance):
         data = super().to_representation(instance)
         from django.db.models import Avg, Count
-        resumo = instance.interacoes.filter(nota__isnull=False).aggregate(media=Avg("nota"), total=Count("id"))
+        if hasattr(instance, "recomendados_total"):
+            resumo = {"media": instance.recomendados_media, "total": instance.recomendados_total}
+        else:
+            resumo = instance.interacoes.filter(nota__isnull=False).aggregate(media=Avg("nota"), total=Count("id"))
         data["nota"] = round(resumo["media"], 1) if resumo["total"] else None
         data["avaliacoes"] = resumo["total"]
         # A imagem original pode ser usada mesmo se a cópia de mídia estiver ausente.
