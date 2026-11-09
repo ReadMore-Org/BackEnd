@@ -42,32 +42,6 @@ class UserViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
     http_method_names = ['get', 'patch', 'post', 'options', 'head']
 
-    @action(detail=False, methods=['post'], url_path='preferencias-leitura')
-    def preferencias_leitura(self, request):
-        from core.serializers.user import ReadingPreferencesSerializer
-        serializer = ReadingPreferencesSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = dict(serializer.validated_data)
-        request.user.reading_preferences_status = data.pop('status')
-        request.user.reading_preferences = data
-        request.user.save(update_fields=['reading_preferences_status', 'reading_preferences'])
-        return Response(MeSerializer(request.user, context=self.get_serializer_context()).data)
-
-    @action(detail=False, methods=['get'], url_path='descobrir-leituras')
-    def descobrir_leituras(self, request):
-        from core.services.reading_preferences import discover_books
-        query = request.query_params.get('q', '').strip()
-        if not 2 <= len(query) <= 150:
-            return Response({'detail': 'Digite de 2 a 150 caracteres.'}, status=400)
-        return Response(discover_books(query))
-
-    @action(detail=False, methods=['get'], url_path='recomendacoes-preferencias')
-    def recomendacoes_preferencias(self, request):
-        from core.services.reading_preferences import personalized_entries
-        if request.user.reading_preferences_status != 'completed':
-            return Response([])
-        return Response(personalized_entries(request.user.reading_preferences))
-
     def partial_update(self, request, *args, **kwargs):
         raise PermissionDenied("Edite seu perfil pelo endpoint /usuarios/me/.")
 

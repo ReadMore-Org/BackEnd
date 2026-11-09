@@ -45,11 +45,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_("Username"),
     )
     show_onboarding = models.BooleanField(default=True)
-    reading_preferences = models.JSONField(default=dict, blank=True)
-    reading_preferences_status = models.CharField(
-        max_length=12, default='pending',
-        choices=[('pending', 'Pendente'), ('completed', 'Respondido'), ('skipped', 'Ignorado')],
-    )
 
     bio = models.CharField(
         max_length=255,

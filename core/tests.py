@@ -12,6 +12,15 @@ class SocialAPITests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.ana)
 
+    def test_profile_and_navigation_no_longer_require_reading_choices(self):
+        response = self.client.get('/api/usuarios/me/')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('reading_preferences', response.data)
+        self.assertNotIn('reading_preferences_status', response.data)
+        for endpoint in ('preferencias-leitura', 'descobrir-leituras', 'recomendacoes-preferencias'):
+            self.assertEqual(self.client.get(f'/api/usuarios/{endpoint}/').status_code, 404)
+        self.assertFalse(any(field.name.startswith('reading_preferences') for field in User._meta.fields))
+
     def test_user_rating_updates_instead_of_duplicating_and_averages(self):
         url = f'/api/usuarios/{self.bia.id}/avaliar/'
         self.assertEqual(self.client.post(url, {'nota': 5}).status_code, 200)
