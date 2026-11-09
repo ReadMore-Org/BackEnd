@@ -70,4 +70,3 @@ class MeSerializer(ModelSerializer):
         ]
 
         read_only_fields = ["id", "email"]
-
