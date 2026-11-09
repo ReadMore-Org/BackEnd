@@ -96,13 +96,16 @@ def anuncio_card(anuncio):
     """Retrato do anúncio mostrado no chat (JSON puro, guardado nas mensagens)."""
     livro_usuario = anuncio.livro_usuario
     livro = livro_usuario.livro
-    capa = livro.capa
+    from uploader.helpers.images import image_url
 
     return {
         "id": anuncio.pk,
         "tipo": anuncio.tipo,
         "titulo": livro.titulo,
-        "capa": capa.url if capa is not None and capa.file else None,
+        "capa": image_url(livro.capa),
+        "livro_id": livro.pk,
+        "google_book_id": livro.google_book_id,
+        "isbn": livro.isbn,
         "dono": livro_usuario.usuario_id,
     }
 

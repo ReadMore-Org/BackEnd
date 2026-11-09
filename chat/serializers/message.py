@@ -72,7 +72,18 @@ class MessageSerializer(serializers.ModelSerializer):
         return message.id in self.context.get("read_ids", ())
 
     def get_anuncio(self, message) -> dict | None:
-        return None if message.is_deleted else message.anuncio_card
+        if message.is_deleted or not message.anuncio_card:
+            return None
+        card = message.anuncio_card
+        # Cartões antigos não guardavam os identificadores necessários para recuperar a capa.
+        if "livro_id" not in card:
+            from core.models import Anuncio
+            from chat.services import anuncio_card
+            anuncio = Anuncio.objects.select_related("livro_usuario__livro__capa").filter(pk=card.get("id")).first()
+            if anuncio:
+                current = anuncio_card(anuncio)
+                return {**current, **card, "capa": current["capa"]}
+        return card
 
 
 class MessageCreateSerializer(serializers.Serializer):

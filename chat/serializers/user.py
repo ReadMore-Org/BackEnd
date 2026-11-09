@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from uploader.helpers.images import image_url
 
 FALLBACK_NAME = "Leitor"
 
@@ -19,7 +20,7 @@ class ChatUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "name", "avatar"]
+        fields = ["id", "name", "avatar", "google_picture"]
         read_only_fields = fields
 
     def get_name(self, user) -> str:
@@ -27,9 +28,4 @@ class ChatUserSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, user) -> str | None:
         # Mesma regra do restante do ReadMore: foto enviada, senão a foto do Google.
-        foto = user.foto
-
-        if foto is not None and foto.file:
-            return foto.file.url
-
-        return user.google_picture or None
+        return image_url(user.foto) or user.google_picture or None
